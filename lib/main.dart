@@ -1,7 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
-const String studentName = 'Ni Komang Mirna Asih';
-const String studentId = '2415051018';
+import 'package:flutter/services.dart' show rootBundle;
 
 void main() {
   runApp(const MyApp());
@@ -18,101 +17,144 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.blue,
-          title: const Text(
-            'Flutter UI Fundamentals',
-            style: TextStyle(color: Colors.white),
-          ),
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
-        body: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: TopicListScreen(),
-        ),
-      ),
+      home: const StudentDataScreen(),
     );
   }
 }
 
-class TopicListScreen extends StatelessWidget {
-  const TopicListScreen({super.key});
+class StudentDataScreen extends StatefulWidget {
+  const StudentDataScreen({super.key});
+
+  @override
+  State<StudentDataScreen> createState() => _StudentDataScreenState();
+}
+
+class _StudentDataScreenState extends State<StudentDataScreen> {
+  // Fungsi pembaca file JSON statik (Tahap 12)
+  Future<Map<String, dynamic>> loadStudentData() async {
+    final jsonString = await rootBundle.loadString('assets/data/student_data.json');
+    return jsonDecode(jsonString) as Map<String, dynamic>;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Data Collection Topics
-    final List<Map<String, dynamic>> topics = [
-      {'title': 'Git & GitHub', 'subtitle': 'Version control', 'done': true},
-      {'title': 'Dart Fundamentals', 'subtitle': 'Language basics', 'done': true},
-      {'title': 'Flutter UI Fundamentals', 'subtitle': 'Widgets & layout', 'done': false},
-      {'title': '$studentId - $studentName', 'subtitle': 'Pemilik aplikasi', 'done': false},
-    ];
-
-    // Menghitung jumlah item yang selesai (Tahap 11)
-    final int completed = topics.where((item) => item['done'] == true).length;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Identitas & Teks Ringkasan (Tahap 11)
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '$studentId - $studentName',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.blue,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$completed dari ${topics.length} topik selesai',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        title: const Text(
+          'Flutter UI Fundamentals - JSON',
+          style: TextStyle(color: Colors.white),
         ),
-        
-        // ListView.builder dengan Tampilan Lebih Informatif (Tahap 11)
-        Expanded(
-          child: ListView.builder(
-            itemCount: topics.length,
-            itemBuilder: (context, index) {
-              final item = topics[index];
-              final bool isDone = item['done'] == true;
+      ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: loadStudentData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData) {
+            return const Center(child: Text('Data tidak ditemukan'));
+          }
 
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                child: ListTile(
-                  leading: Icon(
-                    isDone ? Icons.check_circle : Icons.schedule,
-                    color: isDone ? Colors.green : Colors.orange,
-                  ),
-                  title: Text(item['title'] as String),
-                  subtitle: Text(item['subtitle'] as String),
-                  trailing: Text(
-                    isDone ? 'Selesai' : 'Belum',
-                    style: TextStyle(
-                      color: isDone ? Colors.green : Colors.grey,
-                      fontWeight: FontWeight.bold,
+          final data = snapshot.data!;
+          final student = data['student'] as Map<String, dynamic>;
+          final courses = data['courses'] as List<dynamic>;
+
+          // Menghitung jumlah kursus dengan status 'done'
+          final int completed = courses.where((item) => item['status'] == 'done').length;
+
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Identitas Mahasiswa dari JSON
+                Card(
+                  elevation: 3,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 30,
+                          backgroundImage: AssetImage('assets/images/profile.jpg'),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              student['name'] as String,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              student['nim'] as String,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-      ],
+
+                // Ringkasan Kursus Selesai
+                Text(
+                  '$completed dari ${courses.length} topik selesai',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Daftar List Kursus dari JSON
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: courses.length,
+                    itemBuilder: (context, index) {
+                      final course = courses[index] as Map<String, dynamic>;
+                      final String status = course['status'] as String;
+                      final bool isDone = status == 'done';
+
+                      return Card(
+                        elevation: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        child: ListTile(
+                          leading: Icon(
+                            isDone ? Icons.check_circle : Icons.schedule,
+                            color: isDone ? Colors.green : Colors.orange,
+                          ),
+                          title: Text(course['title'] as String),
+                          subtitle: Text('Kode: ${course['code']} • SKS: ${course['credits']}'),
+                          trailing: Text(
+                            status.toUpperCase(),
+                            style: TextStyle(
+                              color: isDone ? Colors.green : Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
