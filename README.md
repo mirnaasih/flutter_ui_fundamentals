@@ -1,15 +1,16 @@
-# Mobile Praktikum
+## Flutter UI Fundamentals - Learning Dashboard
 
-## Tujuan Aplikasi
-Aplikasi ini dikembangkan sebagai sarana pembelajaran dan latihan praktikum pemrograman perangkat bergerak untuk mengelola aktivitas serta tugas harian secara terstruktur.
+Proyek praktikum pemograman perangkat bergerak untuk membangun antarmuka Flutter secara bertahap mulai dari widget dasar, tata letak (*layout*), hingga pemuatan data JSON statik secara *asynchronous*[cite: 5].
 
-## Rencana Fitur
-1. **Manajemen Tugas:** Menambah, mengubah, dan menghapus daftar tugas kuliah secara dinamis.
-2. **Pengingat Tenggat Waktu:** Fitur notifikasi untuk memantau *deadline* tugas agar tidak terlewat.
-3. **Kategori Mata Kuliah:** Pengelompokan tugas berdasarkan nama mata kuliah masing-masing.
+## Identitas Pemilik Proyek
+* **NAMA:** Ni Komang Mirna Asih[cite: 5]
+* **NIM:** 2415051018[cite: 5]
+* **Kelas:** PTI 4B[cite: 5]
 
-## Cara Menjalankan & Setup
-Pastikan Flutter SDK sudah terpasang di komputer Anda. Jalankan perintah berikut di terminal pada direktori proyek:
+## Fitur Utama
+* Menampilkan profil dan identitas mahasiswa[cite: 5].
+* Ringkasan progres dan statistik pembelajaran[cite: 5].
+* Daftar materi pembelajaran yang dimuat dari file JSON statik (`assets/data/student_data.json`)[cite: 5].
 
 ```bash
 flutter pub get
