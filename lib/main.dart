@@ -17,23 +17,32 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const StudentDataScreen(),
+      home: const DashboardPage(),
     );
   }
 }
 
-class StudentDataScreen extends StatefulWidget {
-  const StudentDataScreen({super.key});
-
-  @override
-  State<StudentDataScreen> createState() => _StudentDataScreenState();
+// Fungsi pembaca file JSON statik
+Future<Map<String, dynamic>> loadStudentData() async {
+  final jsonString = await rootBundle.loadString('assets/data/student_data.json');
+  return jsonDecode(jsonString) as Map<String, dynamic>;
 }
 
-class _StudentDataScreenState extends State<StudentDataScreen> {
-  // Fungsi pembaca file JSON statik (Tahap 12)
-  Future<Map<String, dynamic>> loadStudentData() async {
-    final jsonString = await rootBundle.loadString('assets/data/student_data.json');
-    return jsonDecode(jsonString) as Map<String, dynamic>;
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  // Deklarasi late untuk Future agar diinisialisasi sekali di initState (Tahap 13)
+  late Future<Map<String, dynamic>> studentFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    studentFuture = loadStudentData(); // Inisialisasi future satu kali
   }
 
   @override
@@ -42,26 +51,27 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: const Text(
-          'Flutter UI Fundamentals - JSON',
+          'Learning Dashboard',
           style: TextStyle(color: Colors.white),
         ),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: loadStudentData(),
+        future: studentFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text('Data tidak ditemukan'));
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: Text('Data tidak tersedia'));
           }
 
           final data = snapshot.data!;
           final student = data['student'] as Map<String, dynamic>;
           final courses = data['courses'] as List<dynamic>;
 
-          // Menghitung jumlah kursus dengan status 'done'
           final int completed = courses.where((item) => item['status'] == 'done').length;
 
           return Padding(
@@ -69,7 +79,7 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Identitas Mahasiswa dari JSON
+                // Kartu Informasi Mahasiswa
                 Card(
                   elevation: 3,
                   margin: const EdgeInsets.only(bottom: 16),
@@ -118,7 +128,7 @@ class _StudentDataScreenState extends State<StudentDataScreen> {
                 ),
                 const SizedBox(height: 8),
 
-                // Daftar List Kursus dari JSON
+                // Daftar List Kursus menggunakan ListView.builder
                 Expanded(
                   child: ListView.builder(
                     itemCount: courses.length,
