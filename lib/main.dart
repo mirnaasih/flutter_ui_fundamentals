@@ -41,7 +41,7 @@ class TopicListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Data Collection Topics (Tahap 10)
+    // Data Collection Topics
     final List<Map<String, dynamic>> topics = [
       {'title': 'Git & GitHub', 'subtitle': 'Version control', 'done': true},
       {'title': 'Dart Fundamentals', 'subtitle': 'Language basics', 'done': true},
@@ -49,37 +49,64 @@ class TopicListScreen extends StatelessWidget {
       {'title': '$studentId - $studentName', 'subtitle': 'Pemilik aplikasi', 'done': false},
     ];
 
+    // Menghitung jumlah item yang selesai (Tahap 11)
+    final int completed = topics.where((item) => item['done'] == true).length;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Identitas tetap tampil di atas daftar (Tahap 10)
+        // Identitas & Teks Ringkasan (Tahap 11)
         Padding(
           padding: const EdgeInsets.only(bottom: 12.0),
-          child: Text(
-            '$studentId - $studentName',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Colors.blue,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '$studentId - $studentName',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '$completed dari ${topics.length} topik selesai',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
         
-        // ListView.builder dengan Expanded (Tahap 10)
+        // ListView.builder dengan Tampilan Lebih Informatif (Tahap 11)
         Expanded(
           child: ListView.builder(
             itemCount: topics.length,
             itemBuilder: (context, index) {
               final item = topics[index];
+              final bool isDone = item['done'] == true;
+
               return Card(
                 elevation: 2,
-                margin: const EdgeInsets.symmetric(vertical: 4),
+                margin: const EdgeInsets.symmetric(vertical: 6),
                 child: ListTile(
                   leading: Icon(
-                    item['done'] == true ? Icons.check_circle : Icons.circle_outlined,
-                    color: item['done'] == true ? Colors.green : Colors.grey,
+                    isDone ? Icons.check_circle : Icons.schedule,
+                    color: isDone ? Colors.green : Colors.orange,
                   ),
                   title: Text(item['title'] as String),
                   subtitle: Text(item['subtitle'] as String),
+                  trailing: Text(
+                    isDone ? 'Selesai' : 'Belum',
+                    style: TextStyle(
+                      color: isDone ? Colors.green : Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               );
             },
