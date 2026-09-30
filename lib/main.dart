@@ -29,10 +29,10 @@ class MyApp extends StatelessWidget {
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0), // Spacing luar (Tahap 7)
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Menggunakan Card untuk mengelompokkan profil (Tahap 7)
+                // Kartu Profil Mahasiswa (Tahap 5 & 7)
                 Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
@@ -42,14 +42,11 @@ class MyApp extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        // Foto Profil menggunakan CircleAvatar & Asset Image (Tahap 5)
                         const CircleAvatar(
                           radius: 46,
                           backgroundImage: AssetImage('assets/images/profile.jpg'),
                         ),
                         const SizedBox(height: 12),
-                        
-                        // Nama Mahasiswa
                         Text(
                           studentName,
                           style: const TextStyle(
@@ -57,15 +54,11 @@ class MyApp extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        
-                        // NIM Mahasiswa
                         Text(
                           studentId,
                           style: const TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                         const SizedBox(height: 8),
-                        
-                        // Deskripsi Minat & Icon Aktivitas (Tahap 5 & Solusi Overflow Tahap 7)
                         const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -85,40 +78,49 @@ class MyApp extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Container dengan BoxDecoration untuk Statistik (Tahap 6 & 7)
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: const [
-                      Column(
-                        children: [
-                          Text('8', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text('Widget', style: TextStyle(color: Colors.black54)),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Text('4', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text('Layout', style: TextStyle(color: Colors.black54)),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Text('1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
-                          Text('State', style: TextStyle(color: Colors.black54)),
-                        ],
-                      ),
-                    ],
-                  ),
+                // Bagian Statistik menggunakan Reusable Widget / Function (Tahap 8)
+                Row(
+                  children: [
+                    buildStatCard('8', 'Widget', Icons.widgets),
+                    buildStatCard('4', 'Layout', Icons.view_quilt),
+                    buildStatCard('1', 'State', Icons.sync),
+                  ],
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Fungsi Reusable Widget untuk Kartu Statistik (Tahap 8)
+  Widget buildStatCard(String value, String label, IconData icon) {
+    return Expanded(
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Icon(icon, color: Colors.blue),
+              const SizedBox(height: 6),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: const TextStyle(color: Colors.black54, fontSize: 12),
+              ),
+            ],
           ),
         ),
       ),

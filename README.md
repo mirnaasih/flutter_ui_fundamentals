@@ -5,7 +5,7 @@ Proyek praktikum pemograman perangkat bergerak untuk membangun antarmuka Flutter
 ## Identitas Pemilik Proyek
 * **NAMA:** Ni Komang Mirna Asih[cite: 5]
 * **NIM:** 2415051018[cite: 5]
-* **Kelas:** PTI 4B[cite: 5]
+* **Kelas:** PTI 5B[cite: 5]
 
 ## Fitur Utama
 * Menampilkan profil dan identitas mahasiswa[cite: 5].
