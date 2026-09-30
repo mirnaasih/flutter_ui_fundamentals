@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Foto Profil menggunakan CircleAvatar & Asset Image (Tahap 5)
+              // Foto Profil (Tahap 5)
               const CircleAvatar(
                 radius: 46,
                 backgroundImage: AssetImage('assets/images/profile.jpg'),
@@ -54,13 +54,39 @@ class MyApp extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               
-              // Deskripsi Minat & Icon Aktivitas (Tahap 5)
+              // Deskripsi Minat (Tahap 5)
               const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.phone_android, color: Colors.blue),
                   SizedBox(width: 8),
                   Text('Mobile Programming Student & UI/UX Enthusiast'),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Bagian Statistik dengan Row & Column (Tahap 6)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  Column(
+                    children: [
+                      Text('8', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('Widget', style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text('4', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('Layout', style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text('1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('State', style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
                 ],
               ),
             ],
