@@ -11,29 +11,28 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 10',
+      title: 'Pertemuan 5: Tahap 11',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MainNavigationPage(),
+      home: const AdaptiveNavigationPage(),
     );
   }
 }
 
-class MainNavigationPage extends StatefulWidget {
-  const MainNavigationPage({super.key});
+class AdaptiveNavigationPage extends StatefulWidget {
+  const AdaptiveNavigationPage({super.key});
 
   @override
-  State<MainNavigationPage> createState() => _MainNavigationPageState();
+  State<AdaptiveNavigationPage> createState() => _AdaptiveNavigationPageState();
 }
 
-class _MainNavigationPageState extends State<MainNavigationPage> {
-  int _currentIndex = 0;
+class _AdaptiveNavigationPageState extends State<AdaptiveNavigationPage> {
+  int _selectedIndex = 0;
 
   final String studentId = "2415051018";
   final String studentName = "Ni Komang Mirna Asih";
 
   @override
   Widget build(BuildContext context) {
-    // Daftar halaman/destinasi yang langsung dipanggil di dalam build
     final List<Widget> pages = [
       HomeTab(studentId: studentId, studentName: studentName),
       const CoursesTab(),
@@ -42,34 +41,77 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentIndex == 0
+        title: Text(_selectedIndex == 0
             ? 'Home'
-            : _currentIndex == 1
+            : _selectedIndex == 1
                 ? 'Courses'
                 : 'Profile'),
       ),
-      body: pages[_currentIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Breakpoint Expanded dimulai dari 840
+          if (constraints.maxWidth >= 840) {
+            // Tampilan Expanded: Menggunakan NavigationRail di sebelah kiri
+            return Row(
+              children: [
+                NavigationRail(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: const [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home),
+                      label: Text('Home'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.school),
+                      label: Text('Courses'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.person),
+                      label: Text('Profile'),
+                    ),
+                  ],
+                ),
+                const VerticalDivider(width: 1, thickness: 1),
+                Expanded(
+                  child: pages[_selectedIndex],
+                ),
+              ],
+            );
+          } else {
+            // Tampilan Compact / Medium: Menggunakan NavigationBar di bawah
+            return Scaffold(
+              body: pages[_selectedIndex],
+              bottomNavigationBar: NavigationBar(
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.school),
+                    label: 'Courses',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.person),
+                    label: 'Profile',
+                  ),
+                ],
+              ),
+            );
+          }
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.school),
-            label: 'Courses',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }
@@ -92,7 +134,7 @@ class HomeTab extends StatelessWidget {
           Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const Divider(height: 24),
-          const Text('Selamat datang di Aplikasi Pembelajaran Mobile! Gunakan bilah navigasi di bawah untuk berpindah menu.'),
+          const Text('Selamat datang di Adaptive Navigation App! Ukur ulang jendela emulator untuk melihat perubahan NavigationBar ke NavigationRail.'),
         ],
       ),
     );
