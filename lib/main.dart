@@ -11,54 +11,68 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 1',
+      title: 'Pertemuan 5: Tahap 2',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Tahap1Page(),
+      home: const MediaQueryPage(),
     );
   }
 }
 
-class Tahap1Page extends StatelessWidget {
-  const Tahap1Page({super.key});
+class MediaQueryPage extends StatelessWidget {
+  const MediaQueryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Menggunakan MediaQuery untuk membaca karakteristik layar
+    final size = MediaQuery.of(context).size;
+    final orientation = MediaQuery.of(context).orientation;
+
     final String studentId = "2415051018";
     final String studentName = "Ni Komang Mirna Asih";
 
+    // Kondisi sederhana berdasarkan lebar layar
+    final String layoutType = size.width < 600 ? 'Compact' : 'Wide';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tahap 1: Responsive Layout'),
+        title: const Text('Tahap 2: MediaQuery Demo'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '1. Menggunakan width tetap (500):',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              'NIM: $studentId',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'Nama: $studentName',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const Divider(height: 24),
+            Text(
+              'Width: ${size.width.toStringAsFixed(0)} px',
+              style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
-            // Instruksi Tahap 1 (width tetap 500)
-            Container(
-              width: 500,
-              padding: const EdgeInsets.all(16),
-              color: Colors.red.shade100,
-              child: Text('$studentId - $studentName'),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              '2. Menggunakan width responsif (double.infinity):',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              'Height: ${size.height.toStringAsFixed(0)} px',
+              style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
-            // Perbaikan agar responsif
+            Text(
+              'Orientation: $orientation',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 16),
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              color: Colors.green.shade100,
-              child: Text('$studentId - $studentName'),
+              padding: const EdgeInsets.all(12),
+              color: size.width < 600 ? Colors.orange.shade100 : Colors.purple.shade100,
+              child: Text(
+                'Layout Type: $layoutType',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),
