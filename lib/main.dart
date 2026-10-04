@@ -11,101 +11,94 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 3',
+      title: 'Pertemuan 5: Tahap 4',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const LayoutBuilderPage(),
+      home: const Tahap4Page(),
     );
   }
 }
 
-class LayoutBuilderPage extends StatelessWidget {
-  const LayoutBuilderPage({super.key});
+class Tahap4Page extends StatelessWidget {
+  const Tahap4Page({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final String studentId = "2415051018";
+    final String studentName = "Ni Komang Mirna Asih";
+
+    // Daftar skill untuk demonstrasi Wrap
+    final List<String> skills = [
+      'Flutter',
+      'Dart',
+      'Figma',
+      'UI/UX Design',
+      'Laravel',
+      'Git'
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tahap 3: LayoutBuilder Breakpoint'),
+        title: const Text('Tahap 4: Expanded & Wrap'),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 600) {
-            return const CompactLayout();
-          } else if (constraints.maxWidth < 840) {
-            return const MediumLayout();
-          } else {
-            return const ExpandedLayout();
-          }
-        },
-      ),
-    );
-  }
-}
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Identitas Mahasiswa
+            Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold)),
+            const Divider(height: 24),
 
-class CompactLayout extends StatelessWidget {
-  const CompactLayout({super.key});
+            // Bagian 1: Expanded dengan Flex 2:1 dalam Row
+            const Text(
+              '1. Expanded (Flex 2 : 1):',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    height: 80,
+                    color: Colors.blue.shade200,
+                    alignment: Alignment.center,
+                    child: const Text('Panel A (Flex 2)', textAlign: TextAlign.center),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    height: 80,
+                    color: Colors.green.shade200,
+                    alignment: Alignment.center,
+                    child: const Text('Panel B (Flex 1)', textAlign: TextAlign.center),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.red.shade100,
-      padding: const EdgeInsets.all(16.0),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('NIM: 2415051018', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          Text('Nama: Ni Komang Mirna Asih', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
-          Text('Layout Category: Compact (< 600)', style: TextStyle(fontSize: 18, color: Colors.red)),
-          SizedBox(height: 8),
-          Text('Perbedaan Visual: Tampilan satu kolom vertikal sederhana untuk ponsel.'),
-        ],
-      ),
-    );
-  }
-}
-
-class MediumLayout extends StatelessWidget {
-  const MediumLayout({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.orange.shade100,
-      padding: const EdgeInsets.all(16.0),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('NIM: 2415051018', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          Text('Nama: Ni Komang Mirna Asih', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
-          Text('Layout Category: Medium (600 - 839)', style: TextStyle(fontSize: 20, color: Colors.orange)),
-          SizedBox(height: 8),
-          Text('Perbedaan Visual: Menggunakan elemen card dengan ruang yang sedikit lebih luas untuk tablet kecil.'),
-        ],
-      ),
-    );
-  }
-}
-
-class ExpandedLayout extends StatelessWidget {
-  const ExpandedLayout({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.green.shade100,
-      padding: const EdgeInsets.all(24.0),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('NIM: 2415051018', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          Text('Nama: Ni Komang Mirna Asih', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
-          Text('Layout Category: Expanded (>= 840)', style: TextStyle(fontSize: 22, color: Colors.green)),
-          SizedBox(height: 8),
-          Text('Perbedaan Visual: Tampilan grid/multikolom yang lega khusus untuk layar desktop atau tablet besar.'),
-        ],
+            // Bagian 2: Wrap dengan Chip
+            const Text(
+              '2. Wrap dengan Chip Skills:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 8.0,
+              children: skills.map((skill) {
+                return Chip(
+                  label: Text(skill),
+                  backgroundColor: Colors.purple.shade100,
+                );
+              }).toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
