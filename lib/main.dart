@@ -11,116 +11,132 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 12',
+      title: 'Pertemuan 5: Tahap 13',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const InteractiveCoursePage(),
+      home: const FeedbackFormPage(),
     );
   }
 }
 
-class InteractiveCoursePage extends StatefulWidget {
-  const InteractiveCoursePage({super.key});
+class FeedbackFormPage extends StatefulWidget {
+  const FeedbackFormPage({super.key});
 
   @override
-  State<InteractiveCoursePage> createState() => _InteractiveCoursePageState();
+  State<FeedbackFormPage> createState() => _FeedbackFormPageState();
 }
 
-class _InteractiveCoursePageState extends State<InteractiveCoursePage> {
+class _FeedbackFormPageState extends State<FeedbackFormPage> {
+  // GlobalKey untuk mengontrol state form dan validasi
+  final _formKey = GlobalKey<FormState>();
+
+  // Konstanta identitas mahasiswa (terisi default)
   final String studentId = "2415051018";
   final String studentName = "Ni Komang Mirna Asih";
 
-  final List<Map<String, dynamic>> courses = [
-    {"code": "MOB01", "title": "Git & GitHub", "credits": 2, "isFavorite": false},
-    {"code": "MOB02", "title": "Dart Fundamentals", "credits": 2, "isFavorite": true},
-    {"code": "MOB03", "title": "Flutter UI Fundamentals", "credits": 3, "isFavorite": false},
-    {"code": "MOB04", "title": "UI/UX Prototyping", "credits": 3, "isFavorite": false},
-    {"code": "MOB05", "title": "Laravel Web Development", "credits": 3, "isFavorite": false},
-  ];
+  // Controller untuk field komentar
+  final TextEditingController _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tahap 12: User Interaction'),
+        title: const Text('Tahap 13: Form Input & Validasi'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const Divider(height: 24),
-            const Text(
-              'Ketuk kartu untuk aksi, ikon untuk favorite, atau tahan (long press) untuk info:',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: ListView.builder(
-                itemCount: courses.length,
-                itemBuilder: (context, index) {
-                  final course = courses[index];
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: InkWell(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Anda memilih: ${course["title"]}')),
-                        );
-                      },
-                      onLongPress: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(course["code"]),
-                            content: Text('Informasi Lengkap:\n${course["title"]} bernilai ${course["credits"]} SKS.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('Tutup'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${course["code"]} - ${course["title"]}',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                ),
-                                const SizedBox(height: 4),
-                                Text('SKS: ${course["credits"]}'),
-                              ],
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                course["isFavorite"] ? Icons.favorite : Icons.favorite_border,
-                                color: course["isFavorite"] ? Colors.red : Colors.grey,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  course["isFavorite"] = !course["isFavorite"];
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              // Identitas Mahasiswa di Header
+              Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Divider(height: 24),
+              const Text(
+                'Formulir Umpan Balik (Feedback Praktikum):',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 16),
+
+              // 1 & 2. TextFormField Nama (terisi default)
+              TextFormField(
+                initialValue: studentName,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Lengkap',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Nama wajib diisi';
+                  }
+                  return null;
                 },
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              // 1 & 2. TextFormField NIM (terisi default)
+              TextFormField(
+                initialValue: studentId,
+                decoration: const InputDecoration(
+                  labelText: 'NIM',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'NIM wajib diisi';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 1 & 3. TextFormField Komentar (wajib minimal 5 karakter)
+              TextFormField(
+                controller: _commentController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Komentar / Umpan Balik',
+                  hintText: 'Tuliskan minimal 5 karakter...',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Komentar wajib diisi';
+                  }
+                  if (value.trim().length < 5) {
+                    return 'Komentar minimal harus 5 karakter';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Tombol Submit / Kirim
+              ElevatedButton(
+                onPressed: () {
+                  // 4. Validasi form sebelum menampilkan hasil/aksi
+                  if (_formKey.currentState!.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Formulir berhasil dikirim dan validasi sukses!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                  child: Text('Kirim Feedback', style: TextStyle(fontSize: 16)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
