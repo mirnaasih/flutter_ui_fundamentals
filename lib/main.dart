@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 13',
+      title: 'Pertemuan 5: Tahap 14',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const FeedbackFormPage(),
     );
@@ -26,15 +26,13 @@ class FeedbackFormPage extends StatefulWidget {
 }
 
 class _FeedbackFormPageState extends State<FeedbackFormPage> {
-  // GlobalKey untuk mengontrol state form dan validasi
   final _formKey = GlobalKey<FormState>();
 
-  // Konstanta identitas mahasiswa (terisi default)
   final String studentId = "2415051018";
   final String studentName = "Ni Komang Mirna Asih";
 
-  // Controller untuk field komentar
   final TextEditingController _commentController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -42,11 +40,62 @@ class _FeedbackFormPageState extends State<FeedbackFormPage> {
     super.dispose();
   }
 
+  // Fungsi untuk menampilkan dialog konfirmasi sebelum aksi penting
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Pengiriman'),
+          content: const Text('Apakah Anda yakin ingin mengirimkan feedback ini?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Tutup dialog (batal)
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Tutup dialog
+                _simulateLoadingAndSubmit(); // Lanjut proses
+              },
+              child: const Text('Ya, Kirim'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Simulasi proses loading singkat
+  void _simulateLoadingAndSubmit() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulasi jeda proses asynchronous (misal: kirim ke server)
+    await Future.delayed(const Duration(seconds: 2));
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    // 1. Tampilkan SnackBar setelah proses sukses
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data feedback berhasil disimpan!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tahap 13: Form Input & Validasi'),
+        title: const Text('Tahap 14: Feedback & Loading'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -54,7 +103,6 @@ class _FeedbackFormPageState extends State<FeedbackFormPage> {
           key: _formKey,
           child: ListView(
             children: [
-              // Identitas Mahasiswa di Header
               Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const Divider(height: 24),
@@ -63,40 +111,24 @@ class _FeedbackFormPageState extends State<FeedbackFormPage> {
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
-
-              // 1 & 2. TextFormField Nama (terisi default)
               TextFormField(
                 initialValue: studentName,
                 decoration: const InputDecoration(
                   labelText: 'Nama Lengkap',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Nama wajib diisi';
-                  }
-                  return null;
-                },
+                validator: (value) => (value == null || value.trim().isEmpty) ? 'Nama wajib diisi' : null,
               ),
               const SizedBox(height: 16),
-
-              // 1 & 2. TextFormField NIM (terisi default)
               TextFormField(
                 initialValue: studentId,
                 decoration: const InputDecoration(
                   labelText: 'NIM',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'NIM wajib diisi';
-                  }
-                  return null;
-                },
+                validator: (value) => (value == null || value.trim().isEmpty) ? 'NIM wajib diisi' : null,
               ),
               const SizedBox(height: 16),
-
-              // 1 & 3. TextFormField Komentar (wajib minimal 5 karakter)
               TextFormField(
                 controller: _commentController,
                 maxLines: 3,
@@ -106,35 +138,33 @@ class _FeedbackFormPageState extends State<FeedbackFormPage> {
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Komentar wajib diisi';
-                  }
-                  if (value.trim().length < 5) {
-                    return 'Komentar minimal harus 5 karakter';
-                  }
+                  if (value == null || value.trim().isEmpty) return 'Komentar wajib diisi';
+                  if (value.trim().length < 5) return 'Komentar minimal harus 5 karakter';
                   return null;
                 },
               ),
               const SizedBox(height: 24),
-
-              // Tombol Submit / Kirim
-              ElevatedButton(
-                onPressed: () {
-                  // 4. Validasi form sebelum menampilkan hasil/aksi
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Formulir berhasil dikirim dan validasi sukses!'),
-                        backgroundColor: Colors.green,
+              
+              // 3. Tampilkan CircularProgressIndicator saat loading, atau tombol jika tidak loading
+              _isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
                       ),
-                    );
-                  }
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: Text('Kirim Feedback', style: TextStyle(fontSize: 16)),
-                ),
-              ),
+                    )
+                  : ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          // 2. Tampilkan AlertDialog sebelum aksi penting dilanjutkan
+                          _showConfirmationDialog();
+                        }
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                        child: Text('Kirim Feedback', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
             ],
           ),
         ),
