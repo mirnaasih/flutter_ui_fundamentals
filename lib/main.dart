@@ -11,71 +11,101 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 2',
+      title: 'Pertemuan 5: Tahap 3',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MediaQueryPage(),
+      home: const LayoutBuilderPage(),
     );
   }
 }
 
-class MediaQueryPage extends StatelessWidget {
-  const MediaQueryPage({super.key});
+class LayoutBuilderPage extends StatelessWidget {
+  const LayoutBuilderPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Menggunakan MediaQuery untuk membaca karakteristik layar
-    final size = MediaQuery.of(context).size;
-    final orientation = MediaQuery.of(context).orientation;
-
-    final String studentId = "2415051018";
-    final String studentName = "Ni Komang Mirna Asih";
-
-    // Kondisi sederhana berdasarkan lebar layar
-    final String layoutType = size.width < 600 ? 'Compact' : 'Wide';
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tahap 2: MediaQuery Demo'),
+        title: const Text('Tahap 3: LayoutBuilder Breakpoint'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'NIM: $studentId',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              'Nama: $studentName',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Divider(height: 24),
-            Text(
-              'Width: ${size.width.toStringAsFixed(0)} px',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Height: ${size.height.toStringAsFixed(0)} px',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Orientation: $orientation',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              color: size.width < 600 ? Colors.orange.shade100 : Colors.purple.shade100,
-              child: Text(
-                'Layout Type: $layoutType',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 600) {
+            return const CompactLayout();
+          } else if (constraints.maxWidth < 840) {
+            return const MediumLayout();
+          } else {
+            return const ExpandedLayout();
+          }
+        },
+      ),
+    );
+  }
+}
+
+class CompactLayout extends StatelessWidget {
+  const CompactLayout({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.red.shade100,
+      padding: const EdgeInsets.all(16.0),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('NIM: 2415051018', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('Nama: Ni Komang Mirna Asih', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          SizedBox(height: 16),
+          Text('Layout Category: Compact (< 600)', style: TextStyle(fontSize: 18, color: Colors.red)),
+          SizedBox(height: 8),
+          Text('Perbedaan Visual: Tampilan satu kolom vertikal sederhana untuk ponsel.'),
+        ],
+      ),
+    );
+  }
+}
+
+class MediumLayout extends StatelessWidget {
+  const MediumLayout({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.orange.shade100,
+      padding: const EdgeInsets.all(16.0),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('NIM: 2415051018', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text('Nama: Ni Komang Mirna Asih', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          SizedBox(height: 16),
+          Text('Layout Category: Medium (600 - 839)', style: TextStyle(fontSize: 20, color: Colors.orange)),
+          SizedBox(height: 8),
+          Text('Perbedaan Visual: Menggunakan elemen card dengan ruang yang sedikit lebih luas untuk tablet kecil.'),
+        ],
+      ),
+    );
+  }
+}
+
+class ExpandedLayout extends StatelessWidget {
+  const ExpandedLayout({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.green.shade100,
+      padding: const EdgeInsets.all(24.0),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('NIM: 2415051018', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text('Nama: Ni Komang Mirna Asih', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          SizedBox(height: 16),
+          Text('Layout Category: Expanded (>= 840)', style: TextStyle(fontSize: 22, color: Colors.green)),
+          SizedBox(height: 8),
+          Text('Perbedaan Visual: Tampilan grid/multikolom yang lega khusus untuk layar desktop atau tablet besar.'),
+        ],
       ),
     );
   }
