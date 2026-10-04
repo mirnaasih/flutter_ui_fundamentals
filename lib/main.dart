@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
 class Tahap5Page extends StatelessWidget {
   const Tahap5Page({super.key});
 
-  // Fungsi untuk menentukan jumlah kolom berdasarkan lebar layar
+  // Fungsi untuk mengatur jumlah kolom grid berdasarkan lebar layar
   int columnsFor(double width) {
     if (width < 600) return 1;
     if (width < 840) return 2;
@@ -30,22 +30,22 @@ class Tahap5Page extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Identitas mahasiswa sesuai student_data.json
     final String studentId = "2415051018";
     final String studentName = "Ni Komang Mirna Asih";
 
-    // Contoh data course/mata kuliah
-    final List<String> courses = [
-      'Pemrograman Mobile',
-      'UI/UX Design',
-      'Jaringan Komputer',
-      'Kecerdasan Buatan',
-      'Manajemen Proyek',
-      'Pemrograman Web'
+    // Data courses disesuaikan persis dengan student_data.json
+    final List<Map<String, dynamic>> courses = [
+      {"code": "MOB01", "title": "Git & GitHub", "credits": 2, "status": "done"},
+      {"code": "MOB02", "title": "Dart Fundamentals", "credits": 2, "status": "done"},
+      {"code": "MOB03", "title": "Flutter UI Fundamentals", "credits": 3, "status": "active"},
+      {"code": "MOB04", "title": "UI/UX Prototyping", "credits": 3, "status": "planned"},
+      {"code": "MOB05", "title": "Laravel Web Development", "credits": 3, "status": "planned"},
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tahap 5: Responsive GridView'),
+        title: const Text('Tahap 5: Responsive GridView (JSON Data)'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -57,7 +57,7 @@ class Tahap5Page extends StatelessWidget {
             Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const Divider(height: 24),
 
-            // GridView Responsif menggunakan LayoutBuilder
+            // GridView Responsif menggunakan LayoutBuilder & Data JSON
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -68,21 +68,27 @@ class Tahap5Page extends StatelessWidget {
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: 2.5,
+                      childAspectRatio: 2.2,
                     ),
                     itemCount: courses.length,
                     itemBuilder: (context, index) {
+                      final course = courses[index];
                       return Card(
-                        color: Colors.blue.shade50,
                         elevation: 2,
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              courses[index],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontWeight: FontWeight.w600),
-                            ),
+                        color: Colors.blue.shade50,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${course["code"]} - ${course["title"]}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 4),
+                              Text('SKS: ${course["credits"]} | Status: ${course["status"]}'),
+                            ],
                           ),
                         ),
                       );
