@@ -11,197 +11,117 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 11',
+      title: 'Pertemuan 5: Tahap 12',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const AdaptiveNavigationPage(),
+      home: const InteractiveCoursePage(),
     );
   }
 }
 
-class AdaptiveNavigationPage extends StatefulWidget {
-  const AdaptiveNavigationPage({super.key});
+class InteractiveCoursePage extends StatefulWidget {
+  const InteractiveCoursePage({super.key});
 
   @override
-  State<AdaptiveNavigationPage> createState() => _AdaptiveNavigationPageState();
+  State<InteractiveCoursePage> createState() => _InteractiveCoursePageState();
 }
 
-class _AdaptiveNavigationPageState extends State<AdaptiveNavigationPage> {
-  int _selectedIndex = 0;
-
+class _InteractiveCoursePageState extends State<InteractiveCoursePage> {
   final String studentId = "2415051018";
   final String studentName = "Ni Komang Mirna Asih";
 
+  final List<Map<String, dynamic>> courses = [
+    {"code": "MOB01", "title": "Git & GitHub", "credits": 2, "isFavorite": false},
+    {"code": "MOB02", "title": "Dart Fundamentals", "credits": 2, "isFavorite": true},
+    {"code": "MOB03", "title": "Flutter UI Fundamentals", "credits": 3, "isFavorite": false},
+    {"code": "MOB04", "title": "UI/UX Prototyping", "credits": 3, "isFavorite": false},
+    {"code": "MOB05", "title": "Laravel Web Development", "credits": 3, "isFavorite": false},
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      HomeTab(studentId: studentId, studentName: studentName),
-      const CoursesTab(),
-      ProfileTab(studentId: studentId, studentName: studentName),
-    ];
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(_selectedIndex == 0
-            ? 'Home'
-            : _selectedIndex == 1
-                ? 'Courses'
-                : 'Profile'),
+        title: const Text('Tahap 12: User Interaction'),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Breakpoint Expanded dimulai dari 840
-          if (constraints.maxWidth >= 840) {
-            // Tampilan Expanded: Menggunakan NavigationRail di sebelah kiri
-            return Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: _selectedIndex,
-                  onDestinationSelected: (index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                  },
-                  labelType: NavigationRailLabelType.all,
-                  destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.home),
-                      label: Text('Home'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.school),
-                      label: Text('Courses'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.person),
-                      label: Text('Profile'),
-                    ),
-                  ],
-                ),
-                const VerticalDivider(width: 1, thickness: 1),
-                Expanded(
-                  child: pages[_selectedIndex],
-                ),
-              ],
-            );
-          } else {
-            // Tampilan Compact / Medium: Menggunakan NavigationBar di bawah
-            return Scaffold(
-              body: pages[_selectedIndex],
-              bottomNavigationBar: NavigationBar(
-                selectedIndex: _selectedIndex,
-                onDestinationSelected: (index) {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
-                },
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.home),
-                    label: 'Home',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.school),
-                    label: 'Courses',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.person),
-                    label: 'Profile',
-                  ),
-                ],
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-}
-
-// 1. Tab Home
-class HomeTab extends StatelessWidget {
-  final String studentId;
-  final String studentName;
-
-  const HomeTab({super.key, required this.studentId, required this.studentName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const Divider(height: 24),
-          const Text('Selamat datang di Adaptive Navigation App! Ukur ulang jendela emulator untuk melihat perubahan NavigationBar ke NavigationRail.'),
-        ],
-      ),
-    );
-  }
-}
-
-// 2. Tab Courses
-class CoursesTab extends StatelessWidget {
-  const CoursesTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final List<String> courses = [
-      'Git & GitHub',
-      'Dart Fundamentals',
-      'Flutter UI Fundamentals',
-      'UI/UX Prototyping',
-      'Laravel Web Development'
-    ];
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: courses.length,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          child: ListTile(
-            leading: const Icon(Icons.book, color: Colors.blue),
-            title: Text(courses[index]),
-            subtitle: const Text('Status: Aktif / Selesai'),
-          ),
-        );
-      },
-    );
-  }
-}
-
-// 3. Tab Profile
-class ProfileTab extends StatelessWidget {
-  final String studentId;
-  final String studentName;
-
-  const ProfileTab({super.key, required this.studentId, required this.studentName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Center(
-            child: CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.blueAccent,
-              child: Icon(Icons.person, size: 50, color: Colors.white),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Divider(height: 24),
+            const Text(
+              'Ketuk kartu untuk aksi, ikon untuk favorite, atau tahan (long press) untuk info:',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 8),
-          Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 8),
-          const Text('Program Studi: Pendidikan Teknik Informatika', style: TextStyle(fontSize: 16)),
-          const SizedBox(height: 8),
-          const Text('Kampus: Undiksha', style: TextStyle(fontSize: 16)),
-        ],
+            const SizedBox(height: 12),
+            Expanded(
+              child: ListView.builder(
+                itemCount: courses.length,
+                itemBuilder: (context, index) {
+                  final course = courses[index];
+                  return Card(
+                    elevation: 2,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: InkWell(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Anda memilih: ${course["title"]}')),
+                        );
+                      },
+                      onLongPress: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(course["code"]),
+                            content: Text('Informasi Lengkap:\n${course["title"]} bernilai ${course["credits"]} SKS.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Tutup'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${course["code"]} - ${course["title"]}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                                const SizedBox(height: 4),
+                                Text('SKS: ${course["credits"]}'),
+                              ],
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                course["isFavorite"] ? Icons.favorite : Icons.favorite_border,
+                                color: course["isFavorite"] ? Colors.red : Colors.grey,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  course["isFavorite"] = !course["isFavorite"];
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
