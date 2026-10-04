@@ -11,15 +11,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pertemuan 5: Tahap 6',
+      title: 'Pertemuan 5: Tahap 7',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Tahap6Page(),
+      home: const HomePage(),
     );
   }
 }
 
-class Tahap6Page extends StatelessWidget {
-  const Tahap6Page({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +28,9 @@ class Tahap6Page extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tahap 6: Scrollable Content & Keyboard'),
+        title: const Text('Tahap 7: Home Page'),
       ),
-      // Menggunakan SingleChildScrollView agar halaman bisa di-scroll saat konten tinggi atau keyboard muncul
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,56 +38,55 @@ class Tahap6Page extends StatelessWidget {
             Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const Divider(height: 24),
-            const Text(
-              'Formulir Profil Pengguna:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Nama Lengkap',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Nomor Telepon',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Alamat',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 24),
-            // Menambahkan beberapa card/elemen tiruan agar tinggi konten melebihi layar
-            ...List.generate(5, (index) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                color: Colors.blue.shade50,
-                child: Text('Card Informasi Tambahan ke-${index + 1}'),
-              );
-            }),
+            const Text('Ini adalah halaman utama (Home Page).'),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: const Text('Simpan Data'),
-              ),
+            ElevatedButton(
+              onPressed: () {
+                // Menggunakan Navigator.push untuk membuka DetailPage
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DetailPage(),
+                  ),
+                );
+              },
+              child: const Text('Buka Detail'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailPage extends StatelessWidget {
+  const DetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final String studentId = "2415051018";
+    final String studentName = "Ni Komang Mirna Asih";
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tahap 7: Detail Page'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Divider(height: 24),
+            const Text('Ini adalah halaman detail yang dibuka dengan Navigator.push().'),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Menggunakan Navigator.pop untuk kembali
+                Navigator.pop(context);
+              },
+              child: const Text('Kembali (pop)'),
             ),
           ],
         ),
