@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const CourseExplorerApp());
@@ -11,9 +13,9 @@ class CourseExplorerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Responsive Course Explorer',
+      title: 'Course Explorer v2',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
       home: const ResponsiveShell(),
@@ -35,18 +37,34 @@ class StudentHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade700, Colors.blue.shade400],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Nama: $studentName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-          const SizedBox(height: 4),
-          Text('NIM: $studentId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const Text(
+            'IDENTITAS MAHASISWA',
+            style: TextStyle(color: Colors.white70, fontSize: 11, letterSpacing: 1.2, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          Text(studentName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
+          const SizedBox(height: 2),
+          Text('NIM: $studentId', style: const TextStyle(color: Colors.white, fontSize: 14)),
         ],
       ),
     );
@@ -67,20 +85,43 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   final String studentId = "2415051018";
   final String studentName = "Ni Komang Mirna Asih";
 
-  final List<Map<String, dynamic>> _courses = [
-    {"code": "MOB01", "title": "Git & GitHub", "credits": 2, "category": "Version Control", "isFavorite": false},
-    {"code": "MOB02", "title": "Dart Fundamentals", "credits": 2, "category": "Programming", "isFavorite": true},
-    {"code": "MOB03", "title": "Flutter UI Fundamentals", "credits": 3, "category": "Mobile Dev", "isFavorite": false},
-    {"code": "MOB04", "title": "UI/UX Prototyping", "credits": 3, "category": "Design", "isFavorite": false},
-    {"code": "MOB05", "title": "Laravel Web Development", "credits": 3, "category": "Web Dev", "isFavorite": false},
-  ];
+  List<dynamic> _courses = [];
+  bool _isLoadingCourses = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCoursesFromJson();
+  }
+
+  Future<void> _loadCoursesFromJson() async {
+    try {
+      final String jsonString = await rootBundle.loadString('assets/data/student_data.json');
+      final data = jsonDecode(jsonString);
+      setState(() {
+        _courses = data['courses'] ?? [];
+        _isLoadingCourses = false;
+      });
+    } catch (e) {
+      // Fallback data cadangan jika file JSON belum terbaca/terdaftar
+      setState(() {
+        _courses = [
+          {"code": "MOB01", "title": "Git & GitHub", "credits": 2, "category": "Version Control", "isFavorite": false, "status": "done"},
+          {"code": "MOB02", "title": "Dart Fundamentals", "credits": 2, "category": "Programming", "isFavorite": true, "status": "done"},
+          {"code": "MOB03", "title": "Flutter UI Fundamentals", "credits": 3, "category": "Mobile Dev", "isFavorite": false, "status": "active"},
+          {"code": "MOB04", "title": "UI/UX Prototyping", "credits": 3, "category": "Design", "isFavorite": false, "status": "pending"},
+        ];
+        _isLoadingCourses = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       HomePage(studentId: studentId, studentName: studentName),
-      CoursesPage(courses: _courses),
-      ProfilePage(studentId: studentId, studentName: studentName),
+      CoursesPage(courses: _courses, isLoading: _isLoadingCourses),
+      FeedbackFormPage(studentId: studentId, studentName: studentName),
     ];
 
     return LayoutBuilder(
@@ -89,12 +130,16 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(_selectedIndex == 0
-                ? 'Course Explorer - Home'
-                : _selectedIndex == 1
-                    ? 'Course Explorer - Courses'
-                    : 'Course Explorer - Profile'),
-            backgroundColor: Colors.blue.shade100,
+            title: Text(
+              _selectedIndex == 0
+                  ? 'Course Explorer - Home'
+                  : _selectedIndex == 1
+                      ? 'Course Explorer - Courses'
+                      : 'Course Explorer - Profile & Feedback',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.blue.shade50,
+            elevation: 1,
           ),
           body: isExpanded
               ? Row(
@@ -108,9 +153,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       },
                       labelType: NavigationRailLabelType.all,
                       destinations: const [
-                        NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
-                        NavigationRailDestination(icon: Icon(Icons.school), label: Text('Courses')),
-                        NavigationRailDestination(icon: Icon(Icons.person), label: Text('Profile')),
+                        NavigationRailDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: Text('Home')),
+                        NavigationRailDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: Text('Courses')),
+                        NavigationRailDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: Text('Profile')),
                       ],
                     ),
                     const VerticalDivider(width: 1, thickness: 1),
@@ -128,9 +173,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                     });
                   },
                   destinations: const [
-                    NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-                    NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
-                    NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+                    NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
+                    NavigationDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: 'Courses'),
+                    NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
                   ],
                 ),
         );
@@ -139,7 +184,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   }
 }
 
-// 3. PAGES
+// 3. HOME PAGE
 class HomePage extends StatelessWidget {
   final String studentId;
   final String studentName;
@@ -148,32 +193,53 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          StudentHeader(studentId: studentId, studentName: studentName),
-          const SizedBox(height: 20),
-          const Text(
-            'Selamat Datang di Course Explorer!',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              StudentHeader(studentId: studentId, studentName: studentName),
+              const SizedBox(height: 30),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10, spreadRadius: 2),
+                  ],
+                ),
+                child: Column(
+                  children: const [
+                    Icon(Icons.explore, size: 64, color: Colors.blue),
+                    SizedBox(height: 16),
+                    Text(
+                      'Selamat Datang di Course Explorer!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                   
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          const Text(
-            'Aplikasi ini dirancang secara responsif menggunakan Flutter untuk mendukung layout compact maupun expanded.',
-            style: TextStyle(fontSize: 15, color: Colors.black87),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
+// 4. COURSES PAGE
 class CoursesPage extends StatefulWidget {
-  final List<Map<String, dynamic>> courses;
+  final List<dynamic> courses;
+  final bool isLoading;
 
-  const CoursesPage({super.key, required this.courses});
+  const CoursesPage({super.key, required this.courses, required this.isLoading});
 
   @override
   State<CoursesPage> createState() => _CoursesPageState();
@@ -182,49 +248,73 @@ class CoursesPage extends StatefulWidget {
 class _CoursesPageState extends State<CoursesPage> {
   @override
   Widget build(BuildContext context) {
+    if (widget.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (widget.courses.isEmpty) {
+      return const Center(child: Text('Tidak ada data mata kuliah ditemukan.'));
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isWide = constraints.maxWidth >= 840;
 
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Daftar Mata Kuliah Pilihan:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Daftar Mata Kuliah dari JSON:',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: isWide
+                        ? GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 2.8,
+                            ),
+                            itemCount: widget.courses.length,
+                            itemBuilder: (context, index) => _buildCourseCard(context, widget.courses[index]),
+                          )
+                        : ListView.builder(
+                            itemCount: widget.courses.length,
+                            itemBuilder: (context, index) => _buildCourseCard(context, widget.courses[index]),
+                          ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: isWide
-                    ? GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 3.0,
-                        ),
-                        itemCount: widget.courses.length,
-                        itemBuilder: (context, index) => _buildCourseCard(context, widget.courses[index]),
-                      )
-                    : ListView.builder(
-                        itemCount: widget.courses.length,
-                        itemBuilder: (context, index) => _buildCourseCard(context, widget.courses[index]),
-                      ),
-              ),
-            ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildCourseCard(BuildContext context, Map<String, dynamic> course) {
+  Widget _buildCourseCard(BuildContext context, dynamic course) {
+    String status = course["status"] ?? "pending";
+    Color statusColor = status == "done"
+        ? Colors.green
+        : status == "active"
+            ? Colors.orange
+            : Colors.grey;
+
+    bool isFavorite = course["isFavorite"] ?? false;
+
     return Card(
       elevation: 2,
-      margin: const EdgeInsets.only(bottom: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
+        borderRadius: BorderRadius.circular(12),
         onTap: () async {
           final result = await Navigator.push(
             context,
@@ -240,7 +330,7 @@ class _CoursesPageState extends State<CoursesPage> {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(14.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -251,20 +341,25 @@ class _CoursesPageState extends State<CoursesPage> {
                   children: [
                     Text('${course["code"]} - ${course["title"]}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    const SizedBox(height: 4),
-                    Text('SKS: ${course["credits"]} | ${course["category"]}',
-                        style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text('SKS: ${course["credits"]}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        Text('• ${status.toUpperCase()}', style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
                   ],
                 ),
               ),
               IconButton(
                 icon: Icon(
-                  course["isFavorite"] ? Icons.favorite : Icons.favorite_border,
-                  color: course["isFavorite"] ? Colors.red : Colors.grey,
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : Colors.grey,
                 ),
                 onPressed: () {
                   setState(() {
-                    course["isFavorite"] = !course["isFavorite"];
+                    course["isFavorite"] = !isFavorite;
                   });
                 },
               ),
@@ -276,8 +371,9 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 }
 
+// 5. COURSE DETAIL PAGE
 class CourseDetailPage extends StatelessWidget {
-  final Map<String, dynamic> courseData;
+  final dynamic courseData;
 
   const CourseDetailPage({super.key, required this.courseData});
 
@@ -286,61 +382,74 @@ class CourseDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Detail: ${courseData["code"]}'),
+        backgroundColor: Colors.blue.shade50,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              color: Colors.blue.shade50,
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Kode: ${courseData["code"]}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text('Judul: ${courseData["title"]}', style: const TextStyle(fontSize: 16)),
-                    const SizedBox(height: 8),
-                    Text('Kategori: ${courseData["category"]}', style: const TextStyle(fontSize: 16)),
-                    const SizedBox(height: 8),
-                    Text('Jumlah SKS: ${courseData["credits"]}', style: const TextStyle(fontSize: 16)),
-                  ],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Card(
+                  color: Colors.blue.shade50,
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Kode: ${courseData["code"]}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        const Divider(height: 20),
+                        Text('Judul: ${courseData["title"]}', style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text('Kategori: ${courseData["category"]}', style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text('Jumlah SKS: ${courseData["credits"]}', style: const TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text('Status: ${courseData["status"] ?? "pending"}', style: const TextStyle(fontSize: 16)),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                    child: const Text('Simpan & Kembali', style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: const Text('Simpan & Kembali'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class ProfilePage extends StatefulWidget {
+// 6. PROFILE & FEEDBACK FORM PAGE
+class FeedbackFormPage extends StatefulWidget {
   final String studentId;
   final String studentName;
 
-  const ProfilePage({super.key, required this.studentId, required this.studentName});
+  const FeedbackFormPage({super.key, required this.studentId, required this.studentName});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<FeedbackFormPage> createState() => _FeedbackFormPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  // Deklarasi _formKey yang benar di dalam state
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+class _FeedbackFormPageState extends State<FeedbackFormPage> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _commentController = TextEditingController();
   bool _isLoading = false;
 
@@ -353,27 +462,29 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showConfirmationDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi'),
-        content: const Text('Apakah Anda yakin ingin mengirimkan umpan balik ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _submitFormWithLoading();
-            },
-            child: const Text('Ya'),
-          ),
-        ],
-      ),
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Pengiriman'),
+          content: const Text('Apakah Anda yakin ingin mengirimkan feedback ini?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _simulateLoadingAndSubmit();
+              },
+              child: const Text('Ya, Kirim'),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  void _submitFormWithLoading() async {
+  void _simulateLoadingAndSubmit() async {
     setState(() {
       _isLoading = true;
     });
@@ -387,8 +498,9 @@ class _ProfilePageState extends State<ProfilePage> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Feedback berhasil dikirim dan divalidasi!'),
+          content: Text('Data feedback berhasil disimpan!'),
           backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
         ),
       );
     }
@@ -396,66 +508,114 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          StudentHeader(studentId: widget.studentId, studentName: widget.studentName),
-          const SizedBox(height: 20),
-          const Text(
-            'Formulir Umpan Balik (Feedback):',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  initialValue: widget.studentName,
-                  decoration: const InputDecoration(labelText: 'Nama Lengkap', border: OutlineInputBorder()),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'Nama wajib diisi' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  initialValue: widget.studentId,
-                  decoration: const InputDecoration(labelText: 'NIM', border: OutlineInputBorder()),
-                  validator: (value) => (value == null || value.trim().isEmpty) ? 'NIM wajib diisi' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _commentController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Komentar',
-                    hintText: 'Minimal 5 karakter...',
-                    border: OutlineInputBorder(),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // FOTO PROFIL DARI ASSET
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.blue.shade100,
+                backgroundImage: const AssetImage('assets/images/profile.jpg'),
+                onBackgroundImageError: (exception, stackTrace) {},
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/profile.jpg',
+                    errorBuilder: (context, error, stackTrace) => Text(
+                      widget.studentName.isNotEmpty ? widget.studentName[0] : 'M',
+                      style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.blue.shade800),
+                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) return 'Komentar wajib diisi';
-                    if (value.trim().length < 5) return 'Komentar minimal 5 karakter';
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 16),
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              _showConfirmationDialog();
-                            }
-                          },
-                          child: const Text('Kirim Feedback'),
-                        ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                widget.studentName,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'NIM: ${widget.studentId}',
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Formulir Umpan Balik (Feedback Praktikum):',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      initialValue: widget.studentName,
+                      decoration: const InputDecoration(
+                        labelText: 'Nama Lengkap',
+                        border: OutlineInputBorder(),
                       ),
-              ],
-            ),
+                      validator: (value) => (value == null || value.trim().isEmpty) ? 'Nama wajib diisi' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      initialValue: widget.studentId,
+                      decoration: const InputDecoration(
+                        labelText: 'NIM',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) => (value == null || value.trim().isEmpty) ? 'NIM wajib diisi' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _commentController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Komentar / Umpan Balik',
+                        hintText: 'Tuliskan minimal 5 karakter...',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) return 'Komentar wajib diisi';
+                        if (value.trim().length < 5) return 'Komentar minimal harus 5 karakter';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    _isLoading
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  _showConfirmationDialog();
+                                }
+                              },
+                              child: const Text('Kirim Feedback', style: TextStyle(fontSize: 16)),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
