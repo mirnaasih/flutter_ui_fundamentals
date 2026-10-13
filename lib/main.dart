@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'models/course.dart'; 
 import 'services/course_service.dart';
 import 'repositories/course_repository.dart';
-
+import 'providers/course_provider.dart';
 // ni komang mirna asih
 // 2415051018
 
@@ -24,8 +24,14 @@ class CourseState extends ChangeNotifier {
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => CourseState(),
+    MultiProvider(
+      providers: [
+        // Tambahkan CourseState di sini agar bisa dibaca oleh seluruh aplikasi
+        ChangeNotifierProvider(create: (_) => CourseState()),
+        ChangeNotifierProvider(
+          create: (_) => CourseProvider(CourseRepository(CourseService()))..loadCourses(),
+        ),
+      ],
       child: const CourseExplorerApp(),
     ),
   );
@@ -110,7 +116,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   final String studentId = "2415051018";
   final String studentName = "Ni Komang Mirna Asih";
 
-  List<Course> _courses = []; // Ubah tipe dari List<dynamic> menjadi List<Course>
+  List<Course> _courses = [];
   bool _isLoadingCourses = true;
 
   @override
@@ -119,29 +125,26 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     _loadCoursesFromJson();
   }
 
- Future<void> _loadCoursesFromJson() async {
-  try {
-    // Menggunakan CourseRepository sebagai lapisan abstraksi data
-    final repository = CourseRepository(CourseService());
-    final courses = await repository.getCourses();
-    setState(() {
-      _courses = courses;
-      _isLoadingCourses = false;
-    });
-  } catch (e) {
-    setState(() {
-      _isLoadingCourses = false;
-    });
+  Future<void> _loadCoursesFromJson() async {
+    try {
+      final repository = CourseRepository(CourseService());
+      final courses = await repository.getCourses();
+      setState(() {
+        _courses = courses;
+        _isLoadingCourses = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCourses = false;
+      });
+    }
   }
 
-}
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       HomePage(studentId: studentId, studentName: studentName),
       CoursesPage(
-        courses: _courses, 
-        isLoading: _isLoadingCourses,
         studentId: studentId,     
         studentName: studentName, 
       ),
@@ -245,7 +248,6 @@ class HomePage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                   
                   ],
                 ),
               ),
@@ -258,32 +260,34 @@ class HomePage extends StatelessWidget {
 }
 
 // 4. COURSES PAGE
-class CoursesPage extends StatefulWidget {
-  final List<Course> courses; // Ubah tipe dari List<dynamic> menjadi List<Course>
-  final bool isLoading;
+class CoursesPage extends StatelessWidget {
   final String studentId;     
   final String studentName;
 
   const CoursesPage({
     super.key,
-    required this.courses,
-    required this.isLoading,
     required this.studentId,
     required this.studentName,
   });
 
   @override
-  State<CoursesPage> createState() => _CoursesPageState();
-}
-
-class _CoursesPageState extends State<CoursesPage> {
-  @override
   Widget build(BuildContext context) {
-    if (widget.isLoading) {
+    final courseProvider = context.watch<CourseProvider>();
+
+    if (courseProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (widget.courses.isEmpty) {
+    if (courseProvider.error != null) {
+      return Center(
+        child: Text(
+          'Terjadi kesalahan: ${courseProvider.error}',
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    if (courseProvider.courses.isEmpty) {
       return const Center(child: Text('Tidak ada data mata kuliah ditemukan.'));
     }
 
@@ -300,8 +304,8 @@ class _CoursesPageState extends State<CoursesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   StudentHeader(
-                    studentId: widget.studentId,
-                    studentName: widget.studentName,
+                    studentId: studentId,
+                    studentName: studentName,
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -318,12 +322,12 @@ class _CoursesPageState extends State<CoursesPage> {
                               mainAxisSpacing: 16,
                               childAspectRatio: 2.8,
                             ),
-                            itemCount: widget.courses.length,
-                            itemBuilder: (context, index) => _buildCourseCard(context, widget.courses[index]),
+                            itemCount: courseProvider.courses.length,
+                            itemBuilder: (context, index) => _buildCourseCard(context, courseProvider.courses[index]),
                           )
                         : ListView.builder(
-                            itemCount: widget.courses.length,
-                            itemBuilder: (context, index) => _buildCourseCard(context, widget.courses[index]),
+                            itemCount: courseProvider.courses.length,
+                            itemBuilder: (context, index) => _buildCourseCard(context, courseProvider.courses[index]),
                           ),
                   ),
                 ],
@@ -336,81 +340,85 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 
 // ni komang mirna asih
-//2415051018
+// 2415051018
   Widget _buildCourseCard(BuildContext context, Course course) {
-    String status = course.status; // Menggunakan properti objek Course
-    Color statusColor = status == "done"
-        ? Colors.green
-        : status == "active"
-            ? Colors.orange
-            : Colors.grey;
+    return Builder(
+      builder: (BuildContext context) {
+        String status = course.status;
+        Color statusColor = status == "done"
+            ? Colors.green
+            : status == "active"
+                ? Colors.orange
+                : Colors.grey;
 
-    final courseState = context.watch<CourseState>();
-    bool isFavorite = courseState.favorites.contains(course.code); // Menggunakan course.code
+        final courseState = context.watch<CourseState>();
+        bool isFavorite = courseState.favorites.contains(course.code);
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CourseDetailPage(courseData: course),
-            ),
-          );
+        return Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.only(bottom: 12),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CourseDetailPage(courseData: course),
+                ),
+              );
 
-          if (result == true && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Aksi berhasil untuk mata kuliah ${course.title}')),
-            );
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(14.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('${course.code} - ${course.title}', // Menggunakan properti objek Course
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    const SizedBox(height: 6),
-                    Row(
+              if (result == true && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Aksi berhasil untuk mata kuliah ${course.title}')),
+                );
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('SKS: ${course.credits}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                        const SizedBox(width: 8),
-                        Text('• ${status.toUpperCase()}', style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text('${course.code} - ${course.title}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Text('SKS: ${course.credits}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            const SizedBox(width: 8),
+                            Text('• ${status.toUpperCase()}', style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.grey,
+                    ),
+                    onPressed: () {
+                      context.read<CourseState>().toggleFavorite(course.code);
+                    },
+                  ),
+                ],
               ),
-              IconButton(
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.red : Colors.grey,
-                ),
-                onPressed: () {
-                  context.read<CourseState>().toggleFavorite(course.code);
-                },
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
 // 5. COURSE DETAIL PAGE
 class CourseDetailPage extends StatelessWidget {
-  final Course courseData; // Ubah tipe dari dynamic menjadi Course
+  final Course courseData;
 
   const CourseDetailPage({super.key, required this.courseData});
 
@@ -553,7 +561,6 @@ class _FeedbackFormPageState extends State<FeedbackFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // FOTO PROFIL DARI ASSET
               CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.blue.shade100,
