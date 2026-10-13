@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; 
 import 'models/course.dart'; 
 import 'services/course_service.dart';
+import 'repositories/course_repository.dart';
 
 // ni komang mirna asih
 // 2415051018
@@ -118,10 +119,11 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     _loadCoursesFromJson();
   }
 
-  Future<void> _loadCoursesFromJson() async {
+ Future<void> _loadCoursesFromJson() async {
   try {
-    // Memanggil CourseService alih-alih membaca langsung rootBundle di UI
-    final courses = await CourseService().loadCourses();
+    // Menggunakan CourseRepository sebagai lapisan abstraksi data
+    final repository = CourseRepository(CourseService());
+    final courses = await repository.getCourses();
     setState(() {
       _courses = courses;
       _isLoadingCourses = false;
@@ -131,6 +133,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       _isLoadingCourses = false;
     });
   }
+
 }
   @override
   Widget build(BuildContext context) {
