@@ -8,7 +8,6 @@ import 'screens/courses_page.dart';
 import 'screens/favorites_page.dart';
 import 'screens/feedback_page.dart';
 
-// Tahap 15 Selesai
 // ni komang mirna asih
 // 2415051018
 
