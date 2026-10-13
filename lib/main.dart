@@ -1,10 +1,31 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart'; 
+
 // ni komang mirna asih
-//2415051018
+// 2415051018
+
+class CourseState extends ChangeNotifier {
+  final Set<String> favorites = {};
+
+  void toggleFavorite(String code) {
+    if (favorites.contains(code)) {
+      favorites.remove(code);
+    } else {
+      favorites.add(code);
+    }
+    notifyListeners();
+  }
+}
+
 void main() {
-  runApp(const CourseExplorerApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CourseState(),
+      child: const CourseExplorerApp(),
+    ),
+  );
 }
 
 class CourseExplorerApp extends StatelessWidget {
@@ -327,7 +348,8 @@ class _CoursesPageState extends State<CoursesPage> {
             ? Colors.orange
             : Colors.grey;
 
-    bool isFavorite = course["isFavorite"] ?? false;
+    final courseState = context.watch<CourseState>();
+    bool isFavorite = courseState.favorites.contains(course["code"]);
 
     return Card(
       elevation: 2,
@@ -377,10 +399,9 @@ class _CoursesPageState extends State<CoursesPage> {
                   isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: isFavorite ? Colors.red : Colors.grey,
                 ),
+                // Menyesuaikan Tahap 7 dengan context.read()
                 onPressed: () {
-                  setState(() {
-                    course["isFavorite"] = !isFavorite;
-                  });
+                  context.read<CourseState>().toggleFavorite(course["code"]);
                 },
               ),
             ],
