@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; 
 import 'models/course.dart'; 
+import 'services/course_service.dart';
 
 // ni komang mirna asih
 // 2415051018
@@ -118,29 +119,19 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   }
 
   Future<void> _loadCoursesFromJson() async {
-    try {
-      final String jsonString = await rootBundle.loadString('assets/data/student_data.json');
-      final data = jsonDecode(jsonString);
-      final List<dynamic> rawList = data['courses'] ?? [];
-      
-      setState(() {
-        // Konversi Map JSON menjadi objek Course menggunakan Course.fromJson()
-        _courses = rawList.map((item) => Course.fromJson(item)).toList();
-        _isLoadingCourses = false;
-      });
-    } catch (e) {
-      // Fallback data cadangan jika file JSON belum terbaca/terdaftar
-      setState(() {
-        _courses = [
-          Course(code: "MOB01", title: "Git & GitHub", credits: 2, category: "Version Control", status: "done", isFavorite: false),
-          Course(code: "MOB02", title: "Dart Fundamentals", credits: 2, category: "Programming", status: "done", isFavorite: true),
-          Course(code: "MOB03", title: "Flutter UI Fundamentals", credits: 3, category: "Mobile Dev", status: "active", isFavorite: false),
-          Course(code: "MOB04", title: "UI/UX Prototyping", credits: 3, category: "Design", status: "pending", isFavorite: false),
-        ];
-        _isLoadingCourses = false;
-      });
-    }
+  try {
+    // Memanggil CourseService alih-alih membaca langsung rootBundle di UI
+    final courses = await CourseService().loadCourses();
+    setState(() {
+      _courses = courses;
+      _isLoadingCourses = false;
+    });
+  } catch (e) {
+    setState(() {
+      _isLoadingCourses = false;
+    });
   }
+}
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
