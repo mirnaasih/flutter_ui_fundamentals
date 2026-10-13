@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; 
+import 'models/course.dart'; 
 
 // ni komang mirna asih
 // 2415051018
@@ -107,7 +108,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   final String studentId = "2415051018";
   final String studentName = "Ni Komang Mirna Asih";
 
-  List<dynamic> _courses = [];
+  List<Course> _courses = []; // Ubah tipe dari List<dynamic> menjadi List<Course>
   bool _isLoadingCourses = true;
 
   @override
@@ -120,24 +121,26 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
     try {
       final String jsonString = await rootBundle.loadString('assets/data/student_data.json');
       final data = jsonDecode(jsonString);
+      final List<dynamic> rawList = data['courses'] ?? [];
+      
       setState(() {
-        _courses = data['courses'] ?? [];
+        // Konversi Map JSON menjadi objek Course menggunakan Course.fromJson()
+        _courses = rawList.map((item) => Course.fromJson(item)).toList();
         _isLoadingCourses = false;
       });
     } catch (e) {
       // Fallback data cadangan jika file JSON belum terbaca/terdaftar
       setState(() {
         _courses = [
-          {"code": "MOB01", "title": "Git & GitHub", "credits": 2, "category": "Version Control", "isFavorite": false, "status": "done"},
-          {"code": "MOB02", "title": "Dart Fundamentals", "credits": 2, "category": "Programming", "isFavorite": true, "status": "done"},
-          {"code": "MOB03", "title": "Flutter UI Fundamentals", "credits": 3, "category": "Mobile Dev", "isFavorite": false, "status": "active"},
-          {"code": "MOB04", "title": "UI/UX Prototyping", "credits": 3, "category": "Design", "isFavorite": false, "status": "pending"},
+          Course(code: "MOB01", title: "Git & GitHub", credits: 2, category: "Version Control", status: "done", isFavorite: false),
+          Course(code: "MOB02", title: "Dart Fundamentals", credits: 2, category: "Programming", status: "done", isFavorite: true),
+          Course(code: "MOB03", title: "Flutter UI Fundamentals", credits: 3, category: "Mobile Dev", status: "active", isFavorite: false),
+          Course(code: "MOB04", title: "UI/UX Prototyping", credits: 3, category: "Design", status: "pending", isFavorite: false),
         ];
         _isLoadingCourses = false;
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
@@ -145,8 +148,8 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
       CoursesPage(
         courses: _courses, 
         isLoading: _isLoadingCourses,
-        studentId: studentId,     // Tambahkan ini
-        studentName: studentName, // Tambahkan ini
+        studentId: studentId,     
+        studentName: studentName, 
       ),
       FeedbackFormPage(studentId: studentId, studentName: studentName),
     ];
@@ -262,12 +265,12 @@ class HomePage extends StatelessWidget {
 
 // 4. COURSES PAGE
 class CoursesPage extends StatefulWidget {
-  final List<dynamic> courses;
+  final List<Course> courses; // Ubah tipe dari List<dynamic> menjadi List<Course>
   final bool isLoading;
   final String studentId;     
   final String studentName;
 
-const CoursesPage({
+  const CoursesPage({
     super.key,
     required this.courses,
     required this.isLoading,
@@ -302,7 +305,6 @@ class _CoursesPageState extends State<CoursesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TAMBAHKAN KARTU IDENTITAS DI SINI
                   StudentHeader(
                     studentId: widget.studentId,
                     studentName: widget.studentName,
@@ -338,10 +340,11 @@ class _CoursesPageState extends State<CoursesPage> {
       },
     );
   }
+
 // ni komang mirna asih
 //2415051018
-  Widget _buildCourseCard(BuildContext context, dynamic course) {
-    String status = course["status"] ?? "pending";
+  Widget _buildCourseCard(BuildContext context, Course course) {
+    String status = course.status; // Menggunakan properti objek Course
     Color statusColor = status == "done"
         ? Colors.green
         : status == "active"
@@ -349,7 +352,7 @@ class _CoursesPageState extends State<CoursesPage> {
             : Colors.grey;
 
     final courseState = context.watch<CourseState>();
-    bool isFavorite = courseState.favorites.contains(course["code"]);
+    bool isFavorite = courseState.favorites.contains(course.code); // Menggunakan course.code
 
     return Card(
       elevation: 2,
@@ -367,7 +370,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
           if (result == true && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Aksi berhasil untuk mata kuliah ${course["title"]}')),
+              SnackBar(content: Text('Aksi berhasil untuk mata kuliah ${course.title}')),
             );
           }
         },
@@ -381,12 +384,12 @@ class _CoursesPageState extends State<CoursesPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('${course["code"]} - ${course["title"]}',
+                    Text('${course.code} - ${course.title}', // Menggunakan properti objek Course
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Text('SKS: ${course["credits"]}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        Text('SKS: ${course.credits}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
                         const SizedBox(width: 8),
                         Text('• ${status.toUpperCase()}', style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
                       ],
@@ -399,9 +402,8 @@ class _CoursesPageState extends State<CoursesPage> {
                   isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: isFavorite ? Colors.red : Colors.grey,
                 ),
-                // Menyesuaikan Tahap 7 dengan context.read()
                 onPressed: () {
-                  context.read<CourseState>().toggleFavorite(course["code"]);
+                  context.read<CourseState>().toggleFavorite(course.code);
                 },
               ),
             ],
@@ -414,7 +416,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
 // 5. COURSE DETAIL PAGE
 class CourseDetailPage extends StatelessWidget {
-  final dynamic courseData;
+  final Course courseData; // Ubah tipe dari dynamic menjadi Course
 
   const CourseDetailPage({super.key, required this.courseData});
 
@@ -422,7 +424,7 @@ class CourseDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detail: ${courseData["code"]}'),
+        title: Text('Detail: ${courseData.code}'),
         backgroundColor: Colors.blue.shade50,
       ),
       body: Center(
@@ -442,15 +444,15 @@ class CourseDetailPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Kode: ${courseData["code"]}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text('Kode: ${courseData.code}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         const Divider(height: 20),
-                        Text('Judul: ${courseData["title"]}', style: const TextStyle(fontSize: 16)),
+                        Text('Judul: ${courseData.title}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Kategori: ${courseData["category"]}', style: const TextStyle(fontSize: 16)),
+                        Text('Kategori: ${courseData.category}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Jumlah SKS: ${courseData["credits"]}', style: const TextStyle(fontSize: 16)),
+                        Text('Jumlah SKS: ${courseData.credits}', style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Status: ${courseData["status"] ?? "pending"}', style: const TextStyle(fontSize: 16)),
+                        Text('Status: ${courseData.status}', style: const TextStyle(fontSize: 16)),
                       ],
                     ),
                   ),
