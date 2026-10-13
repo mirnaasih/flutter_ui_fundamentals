@@ -5,6 +5,7 @@ import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
 import 'screens/home_page.dart';
 import 'screens/courses_page.dart';
+import 'screens/favorites_page.dart';
 import 'screens/feedback_page.dart';
 
 // ni komang mirna asih
@@ -13,12 +14,12 @@ import 'screens/feedback_page.dart';
 class CourseState extends ChangeNotifier {
   final Set<String> favorites = {};
 
+  bool isFavorite(String code) => favorites.contains(code);
+
   void toggleFavorite(String code) {
-    if (favorites.contains(code)) {
-      favorites.remove(code);
-    } else {
-      favorites.add(code);
-    }
+    favorites.contains(code)
+        ? favorites.remove(code)
+        : favorites.add(code);
     notifyListeners();
   }
 }
@@ -70,13 +71,12 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      HomePage(studentId: studentId, studentName: studentName),
-      CoursesPage(
-        studentId: studentId,     
-        studentName: studentName, 
-      ),
-      FeedbackFormPage(studentId: studentId, studentName: studentName),
+      HomePage(studentId: studentId, studentName: studentName), // Index 0: Home
+      CoursesPage(studentId: studentId, studentName: studentName), // Index 1: Courses
+      const FavoritesPage(), // Index 2: Favorites
+      FeedbackFormPage(studentId: studentId, studentName: studentName), // Index 3: Profile & Feedback
     ];
+
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isExpanded = constraints.maxWidth >= 840;
@@ -88,7 +88,9 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                   ? 'Course Explorer - Home'
                   : _selectedIndex == 1
                       ? 'Course Explorer - Courses'
-                      : 'Course Explorer - Profile & Feedback',
+                      : _selectedIndex == 2
+                          ? 'Course Explorer - Favorites'
+                          : 'Course Explorer - Profile & Feedback',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             backgroundColor: Colors.blue.shade50,
@@ -108,6 +110,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                       destinations: const [
                         NavigationRailDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: Text('Home')),
                         NavigationRailDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: Text('Courses')),
+                        NavigationRailDestination(icon: Icon(Icons.favorite_outline), selectedIcon: Icon(Icons.favorite), label: Text('Favorites')),
                         NavigationRailDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: Text('Profile')),
                       ],
                     ),
@@ -128,6 +131,7 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
                   destinations: const [
                     NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
                     NavigationDestination(icon: Icon(Icons.school_outlined), selectedIcon: Icon(Icons.school), label: 'Courses'),
+                    NavigationDestination(icon: Icon(Icons.favorite_outline), selectedIcon: Icon(Icons.favorite), label: 'Favorites'),
                     NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
                   ],
                 ),
