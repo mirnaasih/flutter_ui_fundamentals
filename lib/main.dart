@@ -120,10 +120,14 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       HomePage(studentId: studentId, studentName: studentName),
-      CoursesPage(courses: _courses, isLoading: _isLoadingCourses),
+      CoursesPage(
+        courses: _courses, 
+        isLoading: _isLoadingCourses,
+        studentId: studentId,     // Tambahkan ini
+        studentName: studentName, // Tambahkan ini
+      ),
       FeedbackFormPage(studentId: studentId, studentName: studentName),
     ];
-
     return LayoutBuilder(
       builder: (context, constraints) {
         bool isExpanded = constraints.maxWidth >= 840;
@@ -238,8 +242,16 @@ class HomePage extends StatelessWidget {
 class CoursesPage extends StatefulWidget {
   final List<dynamic> courses;
   final bool isLoading;
+  final String studentId;     
+  final String studentName;
 
-  const CoursesPage({super.key, required this.courses, required this.isLoading});
+const CoursesPage({
+    super.key,
+    required this.courses,
+    required this.isLoading,
+    required this.studentId,
+    required this.studentName,
+  });
 
   @override
   State<CoursesPage> createState() => _CoursesPageState();
@@ -268,8 +280,14 @@ class _CoursesPageState extends State<CoursesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // TAMBAHKAN KARTU IDENTITAS DI SINI
+                  StudentHeader(
+                    studentId: widget.studentId,
+                    studentName: widget.studentName,
+                  ),
+                  const SizedBox(height: 16),
                   const Text(
-                    'Daftar Mata Kuliah dari JSON:',
+                    'Daftar Mata Kuliah:',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
