@@ -14,6 +14,17 @@ class CourseProvider extends ChangeNotifier {
   bool isLoading = false;
   String? error;
 
+  final Set<String> favorites = {};
+
+  bool isFavorite(String code) => favorites.contains(code);
+
+  void toggleFavorite(String code) {
+    favorites.contains(code)
+        ? favorites.remove(code)
+        : favorites.add(code);
+    notifyListeners();
+  }
+
   Future<void> loadCourses() async {
     isLoading = true;
     error = null;

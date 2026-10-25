@@ -6,9 +6,9 @@ import 'package:http/http.dart' as http;
 import '../models/course.dart';
 
 class CourseApiService {
-  CourseApiService(this.baseUrl);
+  final String baseUrl; 
 
-  final String baseUrl;
+  CourseApiService(this.baseUrl);
 
   Future<List<Course>> getCourses() async {
     final response = await http.get(Uri.parse('$baseUrl/courses'));

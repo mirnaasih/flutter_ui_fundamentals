@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; 
-import 'services/course_service.dart';
+import 'services/course_api_service.dart';
 import 'repositories/course_repository.dart';
-import 'providers/course_provider.dart';
+import 'providers/course_provider.dart'; // Pastikan mengimpor CourseProvider
 import 'screens/home_page.dart';
 import 'screens/courses_page.dart';
 import 'screens/favorites_page.dart';
@@ -11,26 +11,16 @@ import 'screens/feedback_page.dart';
 // ni komang mirna asih
 // 2415051018
 
-class CourseState extends ChangeNotifier {
-  final Set<String> favorites = {};
-
-  bool isFavorite(String code) => favorites.contains(code);
-
-  void toggleFavorite(String code) {
-    favorites.contains(code)
-        ? favorites.remove(code)
-        : favorites.add(code);
-    notifyListeners();
-  }
-}
-
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CourseState()),
         ChangeNotifierProvider(
-          create: (_) => CourseProvider(CourseRepository(CourseService()))..loadCourses(),
+          create: (_) => CourseProvider( // <-- Gunakan CourseProvider di sini
+            CourseRepository(
+              CourseApiService('https://course-api-pearl.vercel.app'),
+            ),
+          )..loadCourses(),
         ),
       ],
       child: const CourseExplorerApp(),
@@ -71,10 +61,10 @@ class _ResponsiveShellState extends State<ResponsiveShell> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      HomePage(studentId: studentId, studentName: studentName), // Index 0: Home
-      CoursesPage(studentId: studentId, studentName: studentName), // Index 1: Courses
-      const FavoritesPage(), // Index 2: Favorites
-      FeedbackFormPage(studentId: studentId, studentName: studentName), // Index 3: Profile & Feedback
+      HomePage(studentId: studentId, studentName: studentName),
+      CoursesPage(studentId: studentId, studentName: studentName),
+      const FavoritesPage(),
+      FeedbackFormPage(studentId: studentId, studentName: studentName),
     ];
 
     return LayoutBuilder(
