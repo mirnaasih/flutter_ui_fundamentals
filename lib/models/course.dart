@@ -2,7 +2,7 @@
 // 2415051018
 
 class Course {
-  final int? id; // Ditambahkan sesuai instruksi Tahap 3
+  final int? id; 
   final String code;
   final String title;
   final int credits;
@@ -15,7 +15,7 @@ class Course {
     required this.code,
     required this.title,
     required this.credits,
-    this.status = 'planned', // Nilai default sesuai modul
+    this.status = 'planned', 
     required this.category,
     this.isFavorite = false,
   });

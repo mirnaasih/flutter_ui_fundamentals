@@ -2,14 +2,15 @@
 // 2415051018
 
 import '../models/course.dart';
-import '../services/course_service.dart';
+import '../services/course_api_service.dart';
 
 class CourseRepository {
-  final CourseService service;
+  final CourseApiService apiService;
 
-  CourseRepository(this.service);
+  CourseRepository(this.apiService);
 
-  Future<List<Course>> getCourses() {
-    return service.loadCourses();
+  // Mengubah pemanggilan menjadi getCourses()
+  Future<List<Course>> getCourses() async {
+    return await apiService.getCourses();
   }
 }
