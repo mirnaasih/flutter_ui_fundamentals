@@ -3,6 +3,7 @@ Course Explorer v2
 Aplikasi eksplorasi mata kuliah berbasis Flutter yang menerapkan prinsip Clean Architecture dan Separation of Concerns menggunakan Provider State Management.
 
 Identitas 
+
 - Nama: Ni Komang Mirna Asih  
 - NIM: 2415051018  
 - Program Studi: Pendidikan Teknik Informatika (PTI)  
