@@ -40,3 +40,9 @@ Fitur Utama
 2. Shared Favorites: Manajemen state terpusat untuk menyinkronkan status mata kuliah favorit lintas layar secara real-time.
 3. Responsive Layout: Mendukung tampilan adaptif menggunakan NavigationRail untuk layar lebar dan NavigationBar untuk layar seluler.
 4. Student Identity Integration: Menampilkan identitas dan profil mahasiswa secara konsisten di berbagai modul aplikasi.
+
+Informasi REST Endpoint Course API
+- URL Endpoint: https://course-api-pearl.vercel.app/courses
+- HTTP Method: GET
+- Status Code: 200 OK
+- Field JSON: id, code, title, credits, status
