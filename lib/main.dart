@@ -3,21 +3,26 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'services/course_api_service.dart';
-import 'screens/home_page.dart'; // atau halaman utama aplikasi Anda
+import 'screens/home_page.dart';
 
-void main() {
-  const apiBaseUrl = 'https://course-api-pearl.vercel.app';
-  final repository = CourseRepository(CourseApiService(apiBaseUrl));
+Future<void> main() async {
+  // Wajib dipanggil sebelum inisialisasi asynchronous
+  WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => CourseProvider(repository)..loadCourses(),
-      child: const MyApp(),
-    ),
+  // Konfigurasi Supabase (Ganti dengan URL dan Anon Key project kamu)
+  const supabaseUrl = 'https://vhkmszgznybztfxkckug.supabase.co';
+  const supabaseAnonKey = 'sb_publishable_UynmcTbZyX1Y0t-eVTDXlQ_7cWd2LZb';
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -25,11 +30,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter UI Fundamentals',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Scaffold(
-        body: HomePage(studentId: '2415051018', studentName: 'Ni Komang Mirna Asih'),
+    const supabaseUrl = 'https://vhkmszgznybztfxkckug.supabase.co';
+
+    // MultiProvider dengan CourseProvider, CourseRepository, dan CourseApiService yang menyertakan base URL
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => CourseProvider(
+            CourseRepository(
+              CourseApiService(supabaseUrl),
+            ),
+          ),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter UI Fundamentals',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: const HomePage(
+          studentId: '2415051018',
+          studentName: 'Ni Komang Mirna Asih',
+        ),
       ),
     );
   }
