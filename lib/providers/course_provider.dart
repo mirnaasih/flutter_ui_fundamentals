@@ -15,7 +15,6 @@ class CourseProvider extends ChangeNotifier {
 
   final Set<String> favorites = {};
 
-  // Constructor memanggil loadCourses() agar otomatis mengambil data dari Supabase saat aplikasi dibuka
   CourseProvider(this.repository) {
     loadCourses();
   }
@@ -44,7 +43,6 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  // Alias fetchCourses() agar tetap kompatibel jika dipanggil di bagian lain
   Future<void> fetchCourses() async => await loadCourses();
 
   Future<bool> createCourse(Course course) async {
@@ -54,7 +52,7 @@ class CourseProvider extends ChangeNotifier {
 
     try {
       await repository.createCourse(course);
-      await loadCourses(); // Refresh list setelah berhasil
+      await loadCourses();
       return true;
     } catch (e) {
       error = e.toString();
@@ -65,14 +63,16 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateCourse(String code, Course course) async {
+  // Menggunakan dynamic agar aman menerima int maupun String dari UI
+  Future<bool> updateCourse(dynamic id, Course course) async {
     isSaving = true;
     error = null;
     notifyListeners();
 
     try {
-      await repository.updateCourse(code, course);
-      await loadCourses(); // Refresh list setelah berhasil
+      final int parsedId = id is int ? id : int.parse(id.toString());
+      await repository.updateCourse(parsedId, course);
+      await loadCourses();
       return true;
     } catch (e) {
       error = e.toString();
@@ -83,15 +83,16 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteCourse(String code) async {
+  Future<bool> deleteCourse(dynamic id, String code) async {
     isSaving = true;
     error = null;
     notifyListeners();
 
     try {
-      await repository.deleteCourse(code);
-      favorites.remove(code); // Hapus juga dari daftar favorit jika ada
-      await loadCourses(); // Refresh list setelah berhasil
+      final int parsedId = id is int ? id : int.parse(id.toString());
+      await repository.deleteCourse(parsedId);
+      favorites.remove(code);
+      await loadCourses();
       return true;
     } catch (e) {
       error = e.toString();

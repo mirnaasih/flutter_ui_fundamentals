@@ -5,15 +5,24 @@ import '../models/course.dart';
 import '../services/course_data_source.dart';
 
 class CourseRepository {
-  CourseRepository(this.dataSource);
-
   final CourseDataSource dataSource;
 
-  Future<List<Course>> getCourses() => dataSource.getCourses();
+  CourseRepository(this.dataSource);
 
-  Future<Course> createCourse(Course course) => dataSource.createCourse(course);
+  Future<List<Course>> getCourses() async {
+    return await dataSource.getCourses();
+  }
 
-  Future<void> updateCourse(String code, Course course) => dataSource.updateCourse(code, course);
+  Future<Course> createCourse(Course course) async {
+    return await dataSource.createCourse(course);
+  }
 
-  Future<void> deleteCourse(String code) => dataSource.deleteCourse(code);
+  // Ubah parameter dari String menjadi int id
+  Future<void> updateCourse(int id, Course course) async {
+    return await dataSource.updateCourse(id, course);
+  }
+
+  Future<void> deleteCourse(int id) async {
+    return await dataSource.deleteCourse(id);
+  }
 }

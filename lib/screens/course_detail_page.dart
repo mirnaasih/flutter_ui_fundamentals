@@ -14,70 +14,49 @@ class CourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final courseProvider = context.watch<CourseProvider>();
-    final isFav = courseProvider.isFavorite(course.code);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(course.title),
-        backgroundColor: Colors.blue.shade50,
+        title: const Text('Detail Mata Kuliah'),
         actions: [
-          // Tombol Edit
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditCoursePage(course: course),
+                  builder: (_) => EditCoursePage(course: course),
                 ),
               );
             },
           ),
-          // Tombol Delete dengan Dialog Konfirmasi
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              showDialog(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Hapus Course'),
-                  content: Text('Apakah kamu yakin ingin menghapus "${course.title}"?'),
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Hapus Mata Kuliah'),
+                  content: const Text('Yakin ingin menghapus mata kuliah ini?'),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(ctx, false),
                       child: const Text('Batal'),
                     ),
                     TextButton(
-                      onPressed: () async {
-                        Navigator.pop(context); // Tutup dialog
-                        final provider = context.read<CourseProvider>();
-                        final success = await provider.deleteCourse(course.code);
-
-                        if (!context.mounted) return;
-
-                        if (success) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Course berhasil dihapus!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          Navigator.pop(context); // Kembali ke halaman sebelumnya
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Gagal menghapus: ${provider.error}'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      },
-                      child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Hapus'),
                     ),
                   ],
                 ),
               );
+
+              if (confirm == true && context.mounted) {
+                final provider = Provider.of<CourseProvider>(context, listen: false);
+                final success = await provider.deleteCourse(course.id, course.code);
+                if (success && context.mounted) {
+                  Navigator.pop(context);
+                }
+              }
             },
           ),
         ],
@@ -87,27 +66,13 @@ class CourseDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(course.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Text('Kode Mata Kuliah: ${course.code}', style: const TextStyle(fontSize: 16)),
+            Text('Kode: ${course.code}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text('Jumlah SKS: ${course.credits}', style: const TextStyle(fontSize: 16)),
+            Text('Judul: ${course.title}', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text('SKS: ${course.credits}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
             Text('Status: ${course.status}', style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isFav ? Colors.red.shade50 : Colors.blue.shade50,
-              ),
-              icon: Icon(
-                isFav ? Icons.favorite : Icons.favorite_border,
-                color: isFav ? Colors.red : Colors.blue,
-              ),
-              label: Text(isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit'),
-              onPressed: () {
-                courseProvider.toggleFavorite(course.code);
-              },
-            ),
           ],
         ),
       ),
