@@ -1,48 +1,44 @@
-Course Explorer v2
+Flutter UI Fundamentals - Course Data Manager
+Aplikasi manajemen data mata kuliah (Course Data Manager) yang dikembangkan menggunakan Flutter dan terintegrasi dengan Supabase sebagai backend. Proyek ini menerapkan arsitektur Repository Pattern dan manajemen state berbasis Provider.
 
-Aplikasi eksplorasi mata kuliah berbasis Flutter yang menerapkan prinsip Clean Architecture dan Separation of Concerns menggunakan Provider State Management.
+👤 Identitas Mahasiswa
+Nama: Ni Komang Mirna Asih
 
-Identitas 
+NIM: 2415051018
 
-- Nama: Ni Komang Mirna Asih  
-- NIM: 2415051018  
-- Program Studi: Pendidikan Teknik Informatika (PTI)  
-- Universitas: Universitas Pendidikan Ganesha (Undiksha)  
+Kelas: PTI 4B
 
-Arsitektur dan Alur Data (Dependency Direction)
-Aplikasi ini dirancang dengan alur dependensi satu arah yang terstruktur:
-Screen / Widget -> Provider -> Repository -> Service
-
-Setiap lapisan memiliki tanggung jawab spesifik yang terisolasi dengan jelas guna memastikan kode mudah diuji, dirawat, dan dikembangkan.
-
-Struktur Direktori dan Tanggung Jawab Layer (lib/)
-
-models/
-Menyimpan definisi kelas entitas data (seperti objek Course) beserta fungsi serialisasi atau parsing format JSON.
-
-services/
-Bertanggung jawab penuh dalam mengambil data mentah dari sumber eksternal atau lokal menggunakan rootBundle.
-
-repositories/
-Berperan sebagai jembatan atau abstraksi data antara Provider dan Service, menyaring data agar siap dikonsumsi.
-
-providers/
-Mengelola Application State dan Async State (seperti status loading, error, daftar courses, dan manajemen favorites) serta memicu pembaruan UI via notifyListeners().
-
-screens/
-Berisi halaman-halaman utama antarmuka pengguna aplikasi (Home, Courses, Favorites, Profile/Feedback, dan Detail).
-
-widgets/
-Menyimpan komponen UI modular yang dapat digunakan kembali lintas halaman (misalnya StudentHeader).
+Institusi: Universitas Pendidikan Ganesha (Undiksha)
 
 Fitur Utama
-1. Async State Management: Menangani kondisi Loading, Success, dan Error secara dinamis saat memuat data.
-2. Shared Favorites: Manajemen state terpusat untuk menyinkronkan status mata kuliah favorit lintas layar secara real-time.
-3. Responsive Layout: Mendukung tampilan adaptif menggunakan NavigationRail untuk layar lebar dan NavigationBar untuk layar seluler.
-4. Student Identity Integration: Menampilkan identitas dan profil mahasiswa secara konsisten di berbagai modul aplikasi.
+Manajemen CRUD: Menambah (Create), melihat (Read), memperbarui (Update), dan menghapus (Delete) data mata kuliah.
 
-Informasi REST Endpoint Course API
-- URL Endpoint: https://course-api-pearl.vercel.app/courses
-- HTTP Method: GET
-- Status Code: 200 OK
-- Field JSON: id, code, title, credits, status
+State Management: Menggunakan package provider untuk pemisahan logika aplikasi dan UI secara bersih.
+
+Repository Pattern: Memisahkan lapisan komunikasi data (Data Source & Repository) dari provider dan halaman tampilan (screen).
+
+Penanganan Error: Mekanisme error handling yang tangguh untuk mengatasi gangguan koneksi atau kesalahan pemetaan data tanpa memicu crash.
+
+🏗️ Arsitektur Singkat
+Struktur direktori proyek disusun berdasarkan pemisahan tugas (separation of concerns):
+
+lib/models/: Definisi model data objek Course.
+
+lib/repositories/ & lib/services/: Lapisan akses data yang menghubungkan aplikasi dengan Supabase.
+
+lib/providers/: Pengelolaan status dan alur logika data menggunakan ChangeNotifier.
+
+lib/screens/: Antarmuka pengguna (User Interface) meliputi Dashboard, Add Course, Edit Course, dan Course Detail.
+
+🗄️ Backend
+Supabase: Menggunakan layanan basis data relasional PostgreSQL dari Supabase (vhkmszgznybztfxkckug) yang dilengkapi dengan lapisan keamanan Row Level Security (RLS).
+
+⚙️ Cara Menjalankan Aplikasi
+Clone repository ini ke komputer lokal Anda:git clone [https://github.com/mirnaasih/flutter_ui_fundamentals.git](https://github.com/mirnaasih/flutter_ui_fundamentals.git)
+
+Masuk ke direktori proyek:cd flutter_ui_fundamentals
+
+Unduh seluruh dependensi yang diperlukan:flutter pub get
+
+Jalankan aplikasi di emulator, perangkat fisik, atau browser Chrome:flutter run
+Atau jalankan secara khusus di Google Chrome:flutter run -d chrome
