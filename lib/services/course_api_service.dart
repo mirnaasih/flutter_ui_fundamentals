@@ -4,24 +4,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/course.dart';
+import 'course_data_source.dart';
 
-class CourseApiService {
+class CourseApiService implements CourseDataSource {
   CourseApiService(this.baseUrl);
 
   final String baseUrl;
 
-  Future<void> updateCourse(String code, Course course) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/courses/$code'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(course.toJson()),
-    );
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception('Gagal memperbarui course');
-    }
-  }   
-
+  @override
   Future<List<Course>> getCourses() async {
     final response = await http.get(Uri.parse('$baseUrl/courses'));
 
@@ -35,6 +25,7 @@ class CourseApiService {
         .toList();
   }
 
+  @override
   Future<Course> createCourse(Course course) async {
     final response = await http.post(
       Uri.parse('$baseUrl/courses'),
@@ -50,6 +41,21 @@ class CourseApiService {
 
     throw Exception('Gagal membuat course');
   }
+
+  @override
+  Future<void> updateCourse(String code, Course course) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/courses/$code'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(course.toJson()),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Gagal memperbarui course');
+    }
+  }
+
+  @override
   Future<void> deleteCourse(String code) async {
     final response = await http.delete(
       Uri.parse('$baseUrl/courses/$code'),
