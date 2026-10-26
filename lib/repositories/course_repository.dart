@@ -16,4 +16,7 @@ class CourseRepository {
   Future<Course> createCourse(Course course) async {
     return await apiService.createCourse(course);
   }
+  Future<void> updateCourse(String code, Course course) async {
+    return await apiService.updateCourse(code, course);
+  }
 }

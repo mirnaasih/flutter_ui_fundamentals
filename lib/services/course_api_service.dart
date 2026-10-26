@@ -10,6 +10,18 @@ class CourseApiService {
 
   final String baseUrl;
 
+  Future<void> updateCourse(String code, Course course) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/courses/$code'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(course.toJson()),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Gagal memperbarui course');
+    }
+  }   
+
   Future<List<Course>> getCourses() async {
     final response = await http.get(Uri.parse('$baseUrl/courses'));
 

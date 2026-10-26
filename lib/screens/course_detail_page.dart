@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../providers/course_provider.dart';
+import 'edit_course_page.dart';
 
 class CourseDetailPage extends StatelessWidget {
   final Course course;
@@ -20,6 +21,19 @@ class CourseDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(course.title),
         backgroundColor: Colors.blue.shade50,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditCoursePage(course: course),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
