@@ -50,4 +50,13 @@ class CourseApiService {
 
     throw Exception('Gagal membuat course');
   }
+  Future<void> deleteCourse(String code) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/courses/$code'),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Gagal menghapus course');
+    }
+  }
 }

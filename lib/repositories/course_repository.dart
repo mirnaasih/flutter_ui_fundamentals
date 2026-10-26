@@ -19,4 +19,7 @@ class CourseRepository {
   Future<void> updateCourse(String code, Course course) async {
     return await apiService.updateCourse(code, course);
   }
+  Future<void> deleteCourse(String code) async {
+    return await apiService.deleteCourse(code);
+  }
 }

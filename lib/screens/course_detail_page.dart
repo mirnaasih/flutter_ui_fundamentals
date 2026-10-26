@@ -22,6 +22,7 @@ class CourseDetailPage extends StatelessWidget {
         title: Text(course.title),
         backgroundColor: Colors.blue.shade50,
         actions: [
+          // Tombol Edit
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
@@ -29,6 +30,52 @@ class CourseDetailPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => EditCoursePage(course: course),
+                ),
+              );
+            },
+          ),
+          // Tombol Delete dengan Dialog Konfirmasi
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Hapus Course'),
+                  content: Text('Apakah kamu yakin ingin menghapus "${course.title}"?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Batal'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context); // Tutup dialog
+                        final provider = context.read<CourseProvider>();
+                        final success = await provider.deleteCourse(course.code);
+
+                        if (!context.mounted) return;
+
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Course berhasil dihapus!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          Navigator.pop(context); // Kembali ke halaman sebelumnya
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Gagal menghapus: ${provider.error}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
                 ),
               );
             },
