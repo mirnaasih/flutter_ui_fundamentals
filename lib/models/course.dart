@@ -19,7 +19,15 @@ class Course {
     required this.category,
     this.isFavorite = false,
   });
-
+  
+  Map<String, dynamic> toJson() {
+  return {
+    'code': code,
+    'title': title,
+    'credits': credits,
+    'status': status,
+  };
+}
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
       id: json['id'] as int?,
@@ -32,14 +40,4 @@ class Course {
     );
   }
 
-  // Method toJson() yang wajib ditambahkan di Tahap 3
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'code': code,
-        'title': title,
-        'credits': credits,
-        'status': status,
-        'category': category,
-        'isFavorite': isFavorite,
-      };
 }
