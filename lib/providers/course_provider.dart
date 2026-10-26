@@ -8,14 +8,17 @@ import '../repositories/course_repository.dart';
 class CourseProvider extends ChangeNotifier {
   final CourseRepository repository;
 
-  CourseProvider(this.repository);
-
   List<Course> courses = [];
   bool isLoading = false;
   bool isSaving = false;
   String? error;
 
   final Set<String> favorites = {};
+
+  // Constructor memanggil loadCourses() agar otomatis mengambil data dari Supabase saat aplikasi dibuka
+  CourseProvider(this.repository) {
+    loadCourses();
+  }
 
   bool isFavorite(String code) => favorites.contains(code);
 
@@ -41,6 +44,9 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
+  // Alias fetchCourses() agar tetap kompatibel jika dipanggil di bagian lain
+  Future<void> fetchCourses() async => await loadCourses();
+
   Future<bool> createCourse(Course course) async {
     isSaving = true;
     error = null;
@@ -58,6 +64,7 @@ class CourseProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<bool> updateCourse(String code, Course course) async {
     isSaving = true;
     error = null;
@@ -75,6 +82,7 @@ class CourseProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<bool> deleteCourse(String code) async {
     isSaving = true;
     error = null;
