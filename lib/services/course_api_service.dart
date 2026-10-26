@@ -43,9 +43,9 @@ class CourseApiService implements CourseDataSource {
   }
 
   @override
-  Future<void> updateCourse(String code, Course course) async {
+  Future<void> updateCourse(int id, Course course) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/courses/$code'),
+      Uri.parse('$baseUrl/courses/$id'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(course.toJson()),
     );
@@ -56,9 +56,9 @@ class CourseApiService implements CourseDataSource {
   }
 
   @override
-  Future<void> deleteCourse(String code) async {
+  Future<void> deleteCourse(int id) async {
     final response = await http.delete(
-      Uri.parse('$baseUrl/courses/$code'),
+      Uri.parse('$baseUrl/courses/$id'),
     );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
