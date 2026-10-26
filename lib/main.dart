@@ -10,10 +10,8 @@ import 'services/course_api_service.dart';
 import 'screens/home_page.dart';
 
 Future<void> main() async {
-  // Wajib dipanggil sebelum inisialisasi asynchronous
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Konfigurasi Supabase (Ganti dengan URL dan Anon Key project kamu)
   const supabaseUrl = 'https://vhkmszgznybztfxkckug.supabase.co';
   const supabaseAnonKey = 'sb_publishable_UynmcTbZyX1Y0t-eVTDXlQ_7cWd2LZb';
 
