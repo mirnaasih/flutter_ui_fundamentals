@@ -4,11 +4,8 @@
 import 'package:flutter/foundation.dart';
 import '../models/course.dart';
 import '../repositories/course_repository.dart';
-
 class CourseProvider extends ChangeNotifier {
   final CourseRepository repository;
-
-  CourseProvider(this.repository);
 
   List<Course> courses = [];
   bool isLoading = false;
@@ -16,6 +13,10 @@ class CourseProvider extends ChangeNotifier {
   String? error;
 
   final Set<String> favorites = {};
+
+  CourseProvider(this.repository) {
+    loadCourses();
+  }
 
   bool isFavorite(String code) => favorites.contains(code);
 
@@ -41,6 +42,8 @@ class CourseProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> fetchCourses() async => await loadCourses();
+
   Future<bool> createCourse(Course course) async {
     isSaving = true;
     error = null;
@@ -48,7 +51,7 @@ class CourseProvider extends ChangeNotifier {
 
     try {
       await repository.createCourse(course);
-      await loadCourses(); // Refresh list setelah berhasil
+      await loadCourses();
       return true;
     } catch (e) {
       error = e.toString();
@@ -58,14 +61,17 @@ class CourseProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<bool> updateCourse(String code, Course course) async {
+
+  // Menggunakan dynamic agar aman menerima int maupun String dari UI
+  Future<bool> updateCourse(dynamic id, Course course) async {
     isSaving = true;
     error = null;
     notifyListeners();
 
     try {
-      await repository.updateCourse(code, course);
-      await loadCourses(); // Refresh list setelah berhasil
+      final int parsedId = id is int ? id : int.parse(id.toString());
+      await repository.updateCourse(parsedId, course);
+      await loadCourses();
       return true;
     } catch (e) {
       error = e.toString();
@@ -75,15 +81,17 @@ class CourseProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<bool> deleteCourse(String code) async {
+
+  Future<bool> deleteCourse(dynamic id, String code) async {
     isSaving = true;
     error = null;
     notifyListeners();
 
     try {
-      await repository.deleteCourse(code);
-      favorites.remove(code); // Hapus juga dari daftar favorit jika ada
-      await loadCourses(); // Refresh list setelah berhasil
+      final int parsedId = id is int ? id : int.parse(id.toString());
+      await repository.deleteCourse(parsedId);
+      favorites.remove(code);
+      await loadCourses();
       return true;
     } catch (e) {
       error = e.toString();

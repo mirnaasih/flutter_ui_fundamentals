@@ -6,12 +6,24 @@ import 'package:provider/provider.dart';
 import '../providers/course_provider.dart';
 import '../widgets/error_view.dart';
 import 'course_detail_page.dart';
+import 'add_course_page.dart';
+import 'courses_page.dart';
+import 'favorites_page.dart';
+import '../pages/login_page.dart';
+import '../services/auth_service.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String studentId;
   final String studentName;
 
   const HomePage({super.key, required this.studentId, required this.studentName});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -28,8 +40,16 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _handleLogout() async {
+    await AuthService.instance.logout();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
+
+  Widget _buildDashboardBody(BuildContext context) {
     final courseProvider = context.watch<CourseProvider>();
     final courses = courseProvider.courses;
     final totalCourses = courses.length;
@@ -58,7 +78,7 @@ class HomePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        studentName,
+                        widget.studentName,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -67,7 +87,7 @@ class HomePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "NIM: $studentId",
+                        "NIM: ${widget.studentId}",
                         style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                       ),
                     ],
@@ -120,8 +140,7 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 20),
           const Text('Semua Mata Kuliah:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          
-          // Penanganan State (Loading, Error, Empty, Success)
+
           if (courseProvider.isLoading)
             const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))
           else if (courseProvider.error != null)
@@ -193,6 +212,115 @@ class HomePage extends StatelessWidget {
                 );
               },
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileBody(BuildContext context) {
+    final userEmail = AuthService.instance.currentUser?.email ?? '-';
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          const CircleAvatar(
+            radius: 48,
+            backgroundImage: AssetImage('assets/images/profile.jpg'),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            widget.studentName,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'NIM: ${widget.studentId}',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+          ),
+          const SizedBox(height: 24),
+          Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              leading: const Icon(Icons.email, color: Colors.blue),
+              title: const Text('Email Akun'),
+              subtitle: Text(userEmail),
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _handleLogout,
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = [
+      _buildDashboardBody(context),
+      const CoursesPage(),
+      const FavoritesPage(),
+      _buildProfileBody(context),
+    ];
+
+    final titles = [
+      'Dashboard Course',
+      'Daftar Mata Kuliah',
+      'Mata Kuliah Favorit',
+      'Profil Mahasiswa',
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(titles[_selectedIndex], style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.blue.shade50,
+        actions: _selectedIndex == 0
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.logout, color: Colors.blue),
+                  tooltip: 'Logout',
+                  onPressed: _handleLogout,
+                ),
+              ]
+            : null,
+      ),
+      body: pages[_selectedIndex],
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddCoursePage()),
+                );
+              },
+              backgroundColor: Colors.blue,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Courses'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorites'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

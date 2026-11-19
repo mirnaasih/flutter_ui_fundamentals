@@ -18,60 +18,23 @@ class _AddCoursePageState extends State<AddCoursePage> {
   final _codeController = TextEditingController();
   final _titleController = TextEditingController();
   final _creditsController = TextEditingController();
-  final _categoryController = TextEditingController();
-  String _selectedStatus = 'planned';
+  String _status = 'planned';
 
   @override
   void dispose() {
     _codeController.dispose();
     _titleController.dispose();
     _creditsController.dispose();
-    _categoryController.dispose();
     super.dispose();
-  }
-
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final provider = context.read<CourseProvider>();
-    final newCourse = Course(
-      code: _codeController.text.trim(),
-      title: _titleController.text.trim(),
-      credits: int.parse(_creditsController.text.trim()),
-      status: _selectedStatus,
-      category: _categoryController.text.trim(),
-    );
-
-    final success = await provider.createCourse(newCourse);
-
-    if (!context.mounted) return;
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Course berhasil ditambahkan!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menambahkan course: ${provider.error}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<CourseProvider>();
+    final provider = Provider.of<CourseProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Course Baru', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.blue.shade50,
+        title: const Text('Tambah Course'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -81,60 +44,56 @@ class _AddCoursePageState extends State<AddCoursePage> {
             children: [
               TextFormField(
                 controller: _codeController,
-                decoration: const InputDecoration(labelText: 'Kode Course (misal: MOB07)', border: OutlineInputBorder()),
-                validator: (value) => value == null || value.isEmpty ? 'Kode wajib diisi' : null,
+                decoration: const InputDecoration(labelText: 'Kode Mata Kuliah'),
+                validator: (value) => value!.isEmpty ? 'Kode tidak boleh kosong' : null,
               ),
-              const SizedBox(height: 16),
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Judul Mata Kuliah', border: OutlineInputBorder()),
-                validator: (value) => value == null || value.isEmpty ? 'Judul wajib diisi' : null,
+                decoration: const InputDecoration(labelText: 'Judul Mata Kuliah'),
+                validator: (value) => value!.isEmpty ? 'Judul tidak boleh kosong' : null,
               ),
-              const SizedBox(height: 16),
               TextFormField(
                 controller: _creditsController,
+                decoration: const InputDecoration(labelText: 'SKS (Angka)'),
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'SKS (Angka)', border: OutlineInputBorder()),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'SKS wajib diisi';
-                  if (int.tryParse(value) == null) return 'SKS harus berupa angka';
-                  return null;
-                },
+                validator: (value) => value!.isEmpty ? 'SKS tidak boleh kosong' : null,
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _categoryController,
-                decoration: const InputDecoration(labelText: 'Kategori (misal: Mobile / Web)', border: OutlineInputBorder()),
-                validator: (value) => value == null || value.isEmpty ? 'Kategori wajib diisi' : null,
-              ),
-              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedStatus,
-                decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
+                value: _status,
+                decoration: const InputDecoration(labelText: 'Status'),
                 items: const [
                   DropdownMenuItem(value: 'planned', child: Text('Planned')),
                   DropdownMenuItem(value: 'active', child: Text('Active')),
                   DropdownMenuItem(value: 'done', child: Text('Done')),
                 ],
-                onChanged: (value) {
-                  if (value != null) setState(() => _selectedStatus = value);
+                onChanged: (val) {
+                  setState(() {
+                    _status = val!;
+                  });
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: provider.isSaving ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                ),
+                onPressed: provider.isSaving
+                    ? null
+                    : () async {
+                        if (_formKey.currentState!.validate()) {
+                          final newCourse = Course(
+                            code: _codeController.text.trim(),
+                            title: _titleController.text.trim(),
+                            credits: int.parse(_creditsController.text.trim()),
+                            status: _status,
+                          );
+
+                          final success = await provider.createCourse(newCourse);
+                          if (success && mounted) {
+                            Navigator.pop(context);
+                          }
+                        }
+                      },
                 child: provider.isSaving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : const Text('Simpan Course', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ? const CircularProgressIndicator()
+                    : const Text('Simpan Course'),
               ),
             ],
           ),
