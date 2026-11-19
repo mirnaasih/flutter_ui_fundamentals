@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/user_profile.dart';
 import '../providers/course_provider.dart';
 import '../widgets/error_view.dart';
 import 'course_detail_page.dart';
@@ -24,6 +25,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  UserProfile? _userProfile;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final profile = await AuthService.instance.getCurrentProfile();
+    if (mounted) {
+      setState(() => _userProfile = profile);
+    }
+  }
+
+  String get _currentRole => (_userProfile?.role ?? 'mahasiswa').toLowerCase();
+
+  bool get _canManageCourses => _currentRole == 'dosen' || _currentRole == 'admin';
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -40,12 +59,25 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Color _getRoleColor(String role) {
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return Colors.deepPurple;
+      case 'dosen':
+        return Colors.teal;
+      case 'mahasiswa':
+      default:
+        return Colors.blue;
+    }
+  }
+
   Future<void> _handleLogout() async {
     await AuthService.instance.logout();
     if (!mounted) return;
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
     );
   }
 
@@ -54,13 +86,16 @@ class _HomePageState extends State<HomePage> {
     final courses = courseProvider.courses;
     final totalCourses = courses.length;
     final totalFavorites = courses.where((c) => courseProvider.isFavorite(c.code)).length;
+    final displayName =
+        (_userProfile?.name.isNotEmpty == true) ? _userProfile!.name : widget.studentName;
+    final roleColor = _getRoleColor(_currentRole);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Kartu Profil Mahasiswa
+          // Kartu Profil & Role Pengguna
           Card(
             elevation: 1,
             color: Colors.blue.shade50.withOpacity(0.5),
@@ -74,23 +109,42 @@ class _HomePageState extends State<HomePage> {
                     backgroundImage: AssetImage('assets/images/profile.jpg'),
                   ),
                   const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.studentName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "NIM: ${widget.studentId}",
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                      ),
-                    ],
+                        const SizedBox(height: 2),
+                        Text(
+                          "NIM: ${widget.studentId}",
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: roleColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: roleColor),
+                          ),
+                          child: Text(
+                            'Role: ${_currentRole.toUpperCase()}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: roleColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -218,7 +272,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProfileBody(BuildContext context) {
-    final userEmail = AuthService.instance.currentUser?.email ?? '-';
+    final userEmail = _userProfile?.email.isNotEmpty == true
+        ? _userProfile!.email
+        : (AuthService.instance.currentUser?.email ?? '-');
+    final displayName =
+        (_userProfile?.name.isNotEmpty == true) ? _userProfile!.name : widget.studentName;
+    final roleColor = _getRoleColor(_currentRole);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -231,13 +290,21 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 12),
           Text(
-            widget.studentName,
+            displayName,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
           ),
           const SizedBox(height: 4),
           Text(
             'NIM: ${widget.studentId}',
             style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+          ),
+          const SizedBox(height: 8),
+          Chip(
+            label: Text(
+              _currentRole.toUpperCase(),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: roleColor,
           ),
           const SizedBox(height: 24),
           Card(
@@ -246,6 +313,15 @@ class _HomePageState extends State<HomePage> {
               leading: const Icon(Icons.email, color: Colors.blue),
               title: const Text('Email Akun'),
               subtitle: Text(userEmail),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              leading: Icon(Icons.verified_user, color: roleColor),
+              title: const Text('Role Terdaftar'),
+              subtitle: Text(_currentRole),
             ),
           ),
           const SizedBox(height: 24),
@@ -280,7 +356,7 @@ class _HomePageState extends State<HomePage> {
       'Dashboard Course',
       'Daftar Mata Kuliah',
       'Mata Kuliah Favorit',
-      'Profil Mahasiswa',
+      'Profil Pengguna',
     ];
 
     return Scaffold(
@@ -298,7 +374,7 @@ class _HomePageState extends State<HomePage> {
             : null,
       ),
       body: pages[_selectedIndex],
-      floatingActionButton: _selectedIndex == 0
+      floatingActionButton: (_selectedIndex == 0 && _canManageCourses)
           ? FloatingActionButton(
               onPressed: () {
                 Navigator.push(

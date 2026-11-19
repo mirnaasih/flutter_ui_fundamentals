@@ -1,4 +1,8 @@
+// ni komang mirna asih
+// 2415051018
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/user_profile.dart';
 
 class AuthService {
   AuthService._();
@@ -20,16 +24,28 @@ class AuthService {
     return expiresAt > nowInSeconds;
   }
 
-  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
-
   Future<AuthResponse> register({
     required String email,
     required String password,
+    required String name,
+    required String role,
   }) async {
-    return await _client.auth.signUp(
+    final response = await _client.auth.signUp(
       email: email.trim(),
       password: password,
     );
+
+    final user = response.user;
+    if (user != null) {
+      await _client.from('profiles').upsert({
+        'id': user.id,
+        'email': email.trim(),
+        'name': name.trim(),
+        'role': role,
+      });
+    }
+
+    return response;
   }
 
   Future<AuthResponse> login({
@@ -40,6 +56,20 @@ class AuthService {
       email: email.trim(),
       password: password,
     );
+  }
+
+  Future<UserProfile?> getCurrentProfile() async {
+    final user = currentUser;
+    if (user == null) return null;
+
+    final data = await _client
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (data == null) return null;
+    return UserProfile.fromMap(data);
   }
 
   Future<void> logout() async {

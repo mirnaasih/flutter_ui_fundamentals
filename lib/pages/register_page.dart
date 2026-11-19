@@ -1,3 +1,6 @@
+// ni komang mirna asih
+// 2415051018
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
@@ -11,13 +14,16 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  String _selectedRole = 'mahasiswa';
   bool _isLoading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -32,16 +38,18 @@ class _RegisterPageState extends State<RegisterPage> {
       await AuthService.instance.register(
         email: _emailController.text,
         password: _passwordController.text,
+        name: _nameController.text,
+        role: _selectedRole,
       );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registrasi berhasil! Silakan login.'),
+        SnackBar(
+          content: Text('Registrasi berhasil sebagai $_selectedRole! Silakan login.'),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context); // Kembali ke LoginPage
+      Navigator.pop(context);
     } on AuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -60,7 +68,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Akun Mahasiswa')),
+      appBar: AppBar(title: const Text('Daftar Akun Dashboard Course')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -78,6 +86,17 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nama Lengkap',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                  validator: (val) =>
+                      (val == null || val.trim().isEmpty) ? 'Nama wajib diisi' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
@@ -87,6 +106,23 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   validator: (val) =>
                       (val == null || !val.contains('@')) ? 'Masukkan email valid' : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _selectedRole,
+                  decoration: const InputDecoration(
+                    labelText: 'Role Pengguna',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.badge),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'mahasiswa', child: Text('Mahasiswa')),
+                    DropdownMenuItem(value: 'dosen', child: Text('Dosen')),
+                    DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedRole = val);
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
