@@ -43,6 +43,9 @@ class _HomePageState extends State<HomePage> {
   String get _currentRole => (_userProfile?.role ?? 'mahasiswa').toLowerCase();
 
   bool get _canManageCourses => _currentRole == 'dosen' || _currentRole == 'admin';
+  bool get _canAddCourse => _currentRole == 'dosen' || _currentRole == 'admin';
+  bool get _canEditCourse => _currentRole == 'dosen' || _currentRole == 'admin';
+  bool get _canDeleteCourse => _currentRole == 'admin';
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
