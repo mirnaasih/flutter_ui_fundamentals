@@ -168,7 +168,10 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         const Text("Courses", style: TextStyle(color: Colors.grey, fontSize: 12)),
                         const SizedBox(height: 4),
-                        Text("$totalCourses", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(
+                          "$totalCourses",
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                   ),
@@ -186,7 +189,10 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         const Text("Favorites", style: TextStyle(color: Colors.grey, fontSize: 12)),
                         const SizedBox(height: 4),
-                        Text("$totalFavorites", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(
+                          "$totalFavorites",
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                   ),
@@ -195,11 +201,16 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           const SizedBox(height: 20),
-          const Text('Semua Mata Kuliah:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Semua Mata Kuliah:',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
 
           if (courseProvider.isLoading)
-            const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()))
+            const Center(
+              child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()),
+            )
           else if (courseProvider.error != null)
             ErrorView(
               message: courseProvider.error!,
@@ -230,7 +241,11 @@ class _HomePageState extends State<HomePage> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     title: Text(
                       '${course.code} - ${course.title}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 14),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                        fontSize: 14,
+                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 6),
@@ -238,7 +253,11 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Text(
                             'Status: ${course.status}',
-                            style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12),
+                            style: TextStyle(
+                              color: statusColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                           const Text(' • ', style: TextStyle(color: Colors.grey)),
                           Text(
@@ -261,7 +280,10 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CourseDetailPage(course: course),
+                          builder: (context) => CourseDetailPage(
+                            course: course,
+                            userRole: _currentRole,
+                          ),
                         ),
                       );
                     },

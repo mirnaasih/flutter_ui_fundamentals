@@ -28,8 +28,8 @@ class _EditCoursePageState extends State<EditCoursePage> {
     _codeController = TextEditingController(text: widget.course.code);
     _titleController = TextEditingController(text: widget.course.title);
     _creditsController = TextEditingController(text: widget.course.credits.toString());
-    _status = ['planned', 'active', 'done'].contains(widget.course.status) 
-        ? widget.course.status 
+    _status = ['planned', 'active', 'done'].contains(widget.course.status)
+        ? widget.course.status
         : 'planned';
   }
 
@@ -99,9 +99,24 @@ class _EditCoursePageState extends State<EditCoursePage> {
                             status: _status,
                           );
 
-                          final success = await provider.updateCourse(widget.course.id!, updatedCourse);
-                          if (success && mounted) {
+                          final success = await provider.updateCourse(
+                            widget.course.id!,
+                            updatedCourse,
+                          );
+                          if (!mounted) return;
+
+                          if (success) {
                             Navigator.pop(context);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  provider.actionError ??
+                                      'Operasi update ditolak oleh policy database (RLS).',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
                           }
                         }
                       },

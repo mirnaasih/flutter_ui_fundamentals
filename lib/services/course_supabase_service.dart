@@ -22,29 +22,43 @@ class CourseSupabaseService implements CourseDataSource {
 
   @override
   Future<Course> createCourse(Course course) async {
+    final userId = supabase.auth.currentUser?.id;
+    final payload = {
+      ...course.toJson(),
+      if (userId != null) 'owner_id': userId,
+    };
+
     final row = await supabase
         .from('courses')
-        .insert(course.toJson())
+        .insert(payload)
         .select()
         .single();
 
     return Course.fromJson(row);
   }
-
   @override
   Future<void> updateCourse(int id, Course course) async {
-    await supabase
+    final rows = await supabase
         .from('courses')
         .update(course.toJson())
-        .eq('id', id);
+        .eq('id', id)
+        .select();
+
+    if ((rows as List).isEmpty) {
+      throw Exception('ACCESS DENIED: Operasi update ditolak oleh policy database (RLS).');
+    }
   }
-// Ni Komang Mirna Asih
-//2415051018
+
   @override
   Future<void> deleteCourse(int id) async {
-    await supabase
+    final rows = await supabase
         .from('courses')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
+
+    if ((rows as List).isEmpty) {
+      throw Exception('ACCESS DENIED: Operasi delete ditolak oleh policy database (RLS).');
+    }
   }
 }

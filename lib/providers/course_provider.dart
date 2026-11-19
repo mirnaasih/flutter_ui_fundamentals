@@ -4,6 +4,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/course.dart';
 import '../repositories/course_repository.dart';
+
 class CourseProvider extends ChangeNotifier {
   final CourseRepository repository;
 
@@ -11,6 +12,7 @@ class CourseProvider extends ChangeNotifier {
   bool isLoading = false;
   bool isSaving = false;
   String? error;
+  String? actionError;
 
   final Set<String> favorites = {};
 
@@ -21,9 +23,12 @@ class CourseProvider extends ChangeNotifier {
   bool isFavorite(String code) => favorites.contains(code);
 
   void toggleFavorite(String code) {
-    favorites.contains(code)
-        ? favorites.remove(code)
-        : favorites.add(code);
+    favorites.contains(code) ? favorites.remove(code) : favorites.add(code);
+    notifyListeners();
+  }
+
+  void clearActionError() {
+    actionError = null;
     notifyListeners();
   }
 
@@ -31,7 +36,7 @@ class CourseProvider extends ChangeNotifier {
     isLoading = true;
     error = null;
     notifyListeners();
-    
+
     try {
       courses = await repository.getCourses();
     } catch (e) {
@@ -46,7 +51,7 @@ class CourseProvider extends ChangeNotifier {
 
   Future<bool> createCourse(Course course) async {
     isSaving = true;
-    error = null;
+    actionError = null;
     notifyListeners();
 
     try {
@@ -54,7 +59,7 @@ class CourseProvider extends ChangeNotifier {
       await loadCourses();
       return true;
     } catch (e) {
-      error = e.toString();
+      actionError = e.toString().replaceFirst('Exception: ', '');
       return false;
     } finally {
       isSaving = false;
@@ -65,7 +70,7 @@ class CourseProvider extends ChangeNotifier {
   // Menggunakan dynamic agar aman menerima int maupun String dari UI
   Future<bool> updateCourse(dynamic id, Course course) async {
     isSaving = true;
-    error = null;
+    actionError = null;
     notifyListeners();
 
     try {
@@ -74,7 +79,7 @@ class CourseProvider extends ChangeNotifier {
       await loadCourses();
       return true;
     } catch (e) {
-      error = e.toString();
+      actionError = e.toString().replaceFirst('Exception: ', '');
       return false;
     } finally {
       isSaving = false;
@@ -84,7 +89,7 @@ class CourseProvider extends ChangeNotifier {
 
   Future<bool> deleteCourse(dynamic id, String code) async {
     isSaving = true;
-    error = null;
+    actionError = null;
     notifyListeners();
 
     try {
@@ -94,7 +99,7 @@ class CourseProvider extends ChangeNotifier {
       await loadCourses();
       return true;
     } catch (e) {
-      error = e.toString();
+      actionError = e.toString().replaceFirst('Exception: ', '');
       return false;
     } finally {
       isSaving = false;
