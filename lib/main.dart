@@ -8,7 +8,7 @@ import 'pages/login_page.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'services/auth_service.dart';
-import 'services/course_supabase_service.dart'; // Import service Supabase
+import 'services/course_supabase_service.dart';
 import 'screens/home_page.dart';
 
 Future<void> main() async {
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => CourseProvider(
             CourseRepository(
-              CourseSupabaseService(), // Menggunakan CourseSupabaseService
+              CourseSupabaseService(),
             ),
           ),
         ),
@@ -44,8 +44,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter UI Fundamentals',
         theme: ThemeData(primarySwatch: Colors.blue),
-        // Check Session: jika sudah login masuk ke HomePage, jika belum ke LoginPage
-        home: AuthService.instance.isLoggedIn
+        home: AuthService.instance.hasValidSession
             ? const HomePage(
                 studentId: '2415051018',
                 studentName: 'Ni Komang Mirna Asih',
