@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "474851312722",
+    "project_id": "matakuliah-73ca0",
+    "storage_bucket": "matakuliah-73ca0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474851312722:android:5c99d74c159e6ef3354b8b",
+        "android_client_info": {
+          "package_name": "com.example.aplikasi_pertama"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApJ6ynz7maxDwACucNQz9T4MM12R2IHzM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
